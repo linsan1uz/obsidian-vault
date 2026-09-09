@@ -57079,13 +57079,18 @@ var GIT_TIMEOUT_MS = 12e4;
 var GIT_MAX_BUFFER = 10 * 1024 * 1024;
 var EXCLUDE_BEGIN = "# BEGIN obsidian-mcp-server (managed)";
 var EXCLUDE_END = "# END obsidian-mcp-server (managed)";
-var GITIGNORE_ENTRIES = [
-  ".obsidian/workspace.json",
-  ".obsidian/workspace-mobile.json",
-  ".obsidian/cache/",
-  ".trash/",
-  ".obsidian/plugins/mcp-server/data.json"
-];
+function buildGitignoreEntries(configDir) {
+  return [
+    `${configDir}/workspace.json`,
+    `${configDir}/workspace-mobile.json`,
+    `${configDir}/cache/`,
+    ".trash/",
+    `${configDir}/plugins/mcp-server/data.json`
+  ];
+}
+function getConfigDir(plugin) {
+  return plugin.app.vault.configDir;
+}
 function runGit(cwd, args) {
   return new Promise((resolve, reject) => {
     (0, import_child_process.execFile)("git", args, { cwd, timeout: GIT_TIMEOUT_MS, maxBuffer: GIT_MAX_BUFFER, windowsHide: true }, (err, stdout, stderr) => {
@@ -57147,21 +57152,23 @@ async function ensureRepo(vaultPath, branch, notes) {
   await runGit(vaultPath, ["init", "-b", branch]);
   notes.push(`Initialized new git repository (branch: ${branch}).`);
 }
-async function ensureGitignore(vaultPath, notes) {
+async function ensureGitignore(vaultPath, plugin, notes) {
+  const configDir = getConfigDir(plugin);
+  if (!configDir) return;
   const gitignorePath = path.join(vaultPath, ".gitignore");
   let existing = "";
   try {
     existing = await import_fs.promises.readFile(gitignorePath, "utf8");
   } catch (e) {
   }
-  const present = new Set(existing.split(/\r?\n/).map((l) => l.trim()));
-  const missing = GITIGNORE_ENTRIES.filter((e) => !present.has(e));
+  const present = new Set(existing.split(/\r?\n/).map((line) => line.trim()));
+  const missing = buildGitignoreEntries(configDir).filter((entry) => !present.has(entry));
   if (missing.length === 0) return;
   const block = `${existing.endsWith("\n") || !existing ? "" : "\n"}# obsidian-mcp-server: ignore Obsidian state
 ${missing.join("\n")}
 `;
   await import_fs.promises.appendFile(gitignorePath, block, "utf8");
-  notes.push(`Updated .gitignore (added ${missing.length} entr${missing.length === 1 ? "y" : "ies"}).`);
+  notes.push(`Updated .gitignore (added ${missing.length} rule${missing.length === 1 ? "" : "s"}).`);
 }
 async function ensureRemote(vaultPath, remoteUrl, notes) {
   let current = "";
@@ -57222,6 +57229,34 @@ async function pushWithRetry(vaultPath, branch, notes) {
     await runGit(vaultPath, ["push", "-u", "origin", branch]);
   }
 }
+async function pullRemoteChanges(vaultPath, branch, notes) {
+  try {
+    await runGit(vaultPath, ["fetch", "origin"]);
+  } catch (e) {
+    return 0;
+  }
+  let ahead;
+  try {
+    ahead = parseInt(await runGit(vaultPath, ["rev-list", "--count", `HEAD..origin/${branch}`]), 10);
+  } catch (e) {
+    return 0;
+  }
+  if (!Number.isFinite(ahead) || ahead <= 0) return 0;
+  try {
+    await runGit(vaultPath, ["pull", "--rebase", "origin", branch]);
+    notes.push(`Pulled ${ahead} new commit${ahead === 1 ? "" : "s"} from origin/${branch}.`);
+    return ahead;
+  } catch (err) {
+    try {
+      await runGit(vaultPath, ["rebase", "--abort"]);
+    } catch (e) {
+    }
+    notes.push(
+      `Remote has ${ahead} new commit${ahead === 1 ? "" : "s"} that conflict with local changes. The automatic rebase was aborted so nothing was overwritten \u2014 your latest local commit is intact. Resolve the conflict and sync again. Detail: ${err.message}`
+    );
+    return -1;
+  }
+}
 async function syncVaultGit(plugin, options, logger) {
   var _a4, _b, _c, _d;
   const notes = [];
@@ -57233,7 +57268,7 @@ async function syncVaultGit(plugin, options, logger) {
   }
   const branchSetting = ((_a4 = plugin.settings.githubBranch) == null ? void 0 : _a4.trim()) || "main";
   await ensureRepo(vaultPath, branchSetting, notes);
-  await ensureGitignore(vaultPath, notes);
+  await ensureGitignore(vaultPath, plugin, notes);
   const remoteUrl = ((_c = (_b = options.remote) != null ? _b : plugin.settings.githubRemoteUrl) != null ? _c : "").trim();
   if (remoteUrl) {
     if (options.remote && options.remote.trim() !== plugin.settings.githubRemoteUrl) {
@@ -57256,31 +57291,40 @@ async function syncVaultGit(plugin, options, logger) {
   }
   const branch = await getCurrentBranch(vaultPath, branchSetting);
   let pushed = false;
+  let pulled = 0;
   let remoteConfigured = false;
   if (remoteUrl) {
     remoteConfigured = true;
-    try {
-      await pushWithRetry(vaultPath, branch, notes);
-      pushed = true;
-    } catch (pushErr) {
-      const detail = pushErr.message;
-      if (isAuthError(detail)) {
-        notes.push(
-          "Push failed: authentication with the remote failed. Configure credentials for your git client (e.g. Git Credential Manager for HTTPS or an SSH key)."
-        );
-      } else {
-        notes.push(`Push failed: ${detail}`);
+    const pullOutcome = await pullRemoteChanges(vaultPath, branch, notes);
+    pulled = pullOutcome;
+    if (pullOutcome < 0) {
+      logger == null ? void 0 : logger.warning("sync_github: rebase conflict, push skipped", { branch });
+    } else {
+      pulled = pullOutcome;
+      try {
+        await pushWithRetry(vaultPath, branch, notes);
+        pushed = true;
+      } catch (pushErr) {
+        const detail = pushErr.message;
+        if (isAuthError(detail)) {
+          notes.push(
+            "Push failed: authentication with the remote failed. Configure credentials for your git client (e.g. Git Credential Manager for HTTPS or an SSH key)."
+          );
+        } else {
+          notes.push(`Push failed: ${detail}`);
+        }
+        logger == null ? void 0 : logger.warning("sync_github: push failed", { detail });
       }
-      logger == null ? void 0 : logger.warning("sync_github: push failed", { detail });
     }
   } else {
     notes.push("No remote URL configured \u2014 committed locally only. Set 'Remote URL' in plugin settings or pass the remote argument.");
   }
-  logger == null ? void 0 : logger.info("sync_github: completed", { committed: commit !== null, pushed, changedFiles, branch });
+  logger == null ? void 0 : logger.info("sync_github: completed", { committed: commit !== null, pushed, pulled, changedFiles, branch });
   return {
     ok: true,
     committed: commit !== null,
     pushed,
+    pulled,
     branch,
     commit,
     changedFiles,
@@ -57290,7 +57334,7 @@ async function syncVaultGit(plugin, options, logger) {
 }
 function registerGithubSync(mcp, plugin, tracker, logger) {
   mcp.registerTool("sync_github", {
-    description: "Sync the vault to a git repository and optionally push to a remote (e.g. GitHub). Initializes the vault as a git repository on first run, commits all changes, and pushes to the remote. Notes blocked by the access-control blacklist are excluded from version control. Requires git to be installed on the machine; push authentication uses the local git credentials.",
+    description: "Two-way sync of the vault with a git remote (e.g. GitHub). Initializes the vault as a git repository on first run, pulls new remote commits, commits all local changes, and pushes. Notes blocked by the access-control blacklist are excluded from version control. Requires git to be installed on the machine; remote authentication uses the local git credentials.",
     annotations: { ...WRITE_ANNOTATIONS, openWorldHint: true },
     inputSchema: {
       message: external_exports3.string().max(500).optional().describe('Optional commit message. Defaults to a timestamped "Vault sync" message.'),
@@ -58629,7 +58673,7 @@ var McpSettingTab = class extends import_obsidian25.PluginSettingTab {
       })
     );
     new import_obsidian25.Setting(containerEl).setName("Branch").setDesc("Branch used when initializing a new repository (default: main). Existing repositories keep their current branch.").addText(
-      (text) => text.setPlaceholder("main").setValue(this.plugin.settings.githubBranch).onChange(async (value) => {
+      (text) => text.setPlaceholder("Main").setValue(this.plugin.settings.githubBranch).onChange(async (value) => {
         const branch = value.trim();
         if (!/^[\w.-]+$/i.test(branch)) return;
         this.plugin.settings.githubBranch = branch;
