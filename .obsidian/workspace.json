@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Android多线程/Android线程通信.md",
-                "mode": "source",
+                "file": "kotlin学习/kotlin-lesson-02-类-data-class-与-object.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Android线程通信"
+              "title": "kotlin-lesson-02-类-data-class-与-object"
             }
           }
         ]
@@ -190,17 +190,17 @@
   },
   "active": "b739373ebe37f44b",
   "lastOpenFiles": [
+    "kotlin学习/kotlin-lesson-01-变量函数与null安全.md",
+    "Android JNI学习/JNI学习大纲.md",
+    "Android多线程/Android线程通信.md",
     "Android多线程/线程安全.md",
     "Android JNI学习/Android工程师C++入门教程.md",
-    "Android多线程/Android线程通信.md",
-    "kotlin学习/kotlin-lesson-01-变量函数与null安全.md",
     "kotlin学习/kotlin-lesson-02-类-data-class-与-object.md",
     "个人LL/慢动作录像模式分析.md",
     "个人LL/MoreToNormal_Drag_Stuck_Issue.md",
     "个人LL/ImageReviewActivity_多窗口与横竖屏切换问题.md",
     "个人LL",
     "新建文件夹",
-    "Android JNI学习/JNI学习大纲.md",
     "未命名.canvas",
     "慢动作录像模式分析.md",
     "2026.08.31.md",

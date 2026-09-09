@@ -1,0 +1,34 @@
+{
+  "settings": {
+    "port": 27123,
+    "listenAddress": "127.0.0.1",
+    "authToken": "06eb6aafe315e033f78ad2aa115a3d9f",
+    "requireAuth": true,
+    "blacklist": "Secret/\n#secret",
+    "enableInstructions": true,
+    "customInstructions": "",
+    "includeVaultStructure": true,
+    "enablePrompts": true,
+    "enableMarkdownGuide": true,
+    "enableCanvasGuide": true,
+    "enableBasesGuide": true,
+    "enableResources": true,
+    "enableResourceSubscriptions": true,
+    "maxResourcesListed": 500,
+    "enableSmartAnnotations": true,
+    "githubRemoteUrl": "https://github.com/linsan1uz/obsidian-vault",
+    "githubBranch": "main"
+  },
+  "toolStats": {
+    "describe_vault": {
+      "total": 1,
+      "successful": 1,
+      "failed": 0
+    },
+    "sync_github": {
+      "total": 1,
+      "successful": 0,
+      "failed": 0
+    }
+  }
+}
