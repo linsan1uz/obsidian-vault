@@ -1,0 +1,219 @@
+{
+  "main": {
+    "id": "400d7c07985625cf",
+    "type": "split",
+    "children": [
+      {
+        "id": "8fe8a76287a5cc27",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b739373ebe37f44b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Android多线程/Android线程通信.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Android线程通信"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "9d2801d0c085c2ca",
+    "type": "split",
+    "children": [
+      {
+        "id": "cbfaa29e48d2c0df",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ed18bc76c4a8ea93",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "fb98d7230a2cbd42",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "938c5fb15cc8b3ac",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "fac8a96430ab0a5a",
+    "type": "split",
+    "children": [
+      {
+        "id": "1ed3f8dbe9d78272",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3550e96a5f3b651c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "欢迎.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "反向链接"
+            }
+          },
+          {
+            "id": "66f6f172344e4885",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "欢迎.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "出链"
+            }
+          },
+          {
+            "id": "0f66b0a4c78f2d57",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "ebf2161c833a8567",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "ff196ffa37cb0105",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "欢迎.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "b739373ebe37f44b",
+  "lastOpenFiles": [
+    "Android多线程/线程安全.md",
+    "Android JNI学习/Android工程师C++入门教程.md",
+    "Android多线程/Android线程通信.md",
+    "kotlin学习/kotlin-lesson-01-变量函数与null安全.md",
+    "kotlin学习/kotlin-lesson-02-类-data-class-与-object.md",
+    "个人LL/慢动作录像模式分析.md",
+    "个人LL/MoreToNormal_Drag_Stuck_Issue.md",
+    "个人LL/ImageReviewActivity_多窗口与横竖屏切换问题.md",
+    "个人LL",
+    "新建文件夹",
+    "Android JNI学习/JNI学习大纲.md",
+    "未命名.canvas",
+    "慢动作录像模式分析.md",
+    "2026.08.31.md",
+    "Android多线程",
+    "未命名.md",
+    "欢迎.md",
+    "未命名.base",
+    "kotlin学习",
+    "ImageReviewActivity_多窗口与横竖屏切换问题.md",
+    "MoreToNormal_Drag_Stuck_Issue.md",
+    "线程安全.md",
+    "未命名 1.base",
+    "个人贡献.md",
+    "Android JNI学习"
+  ]
+}
