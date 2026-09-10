@@ -1,7 +1,10 @@
+# Obsidian 配置目录不入库
+.obsidian/
 
+# 回收站
+.trash/
 # obsidian-mcp-server: ignore Obsidian state
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/cache/
-.trash/
 .obsidian/plugins/mcp-server/data.json
