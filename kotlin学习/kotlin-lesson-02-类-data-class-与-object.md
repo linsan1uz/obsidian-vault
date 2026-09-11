@@ -1,3 +1,6 @@
+---
+lark_doc_url: https://longcheer.feishu.cn/docx/OikOdt7h1oUrAix0pw2cdANenUv
+---
 # Kotlin 第 2 课：类、data class 与 object
 
 > 适用读者：已完成第 1 课（变量、函数、null 安全）。

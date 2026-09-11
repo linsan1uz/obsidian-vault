@@ -1,3 +1,6 @@
+---
+lark_doc_url: https://longcheer.feishu.cn/docx/CUf0dRIjGod2IRxL5Pucxhuunrh
+---
 # Kotlin 第 3 课：扩展函数（Extension Functions）
 
 > 适用读者：已完成第 1、2 课（null 安全、data class）。

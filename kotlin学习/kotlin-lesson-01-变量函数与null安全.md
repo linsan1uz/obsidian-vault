@@ -1,3 +1,6 @@
+---
+lark_doc_url: https://longcheer.feishu.cn/docx/HA26dwRtro28YAxR56CcKjCQnrb
+---
 # Kotlin 第 1 课：变量、函数与 Null 安全
 
 > 适用读者：有 Java 基础、目标 Android 开发。

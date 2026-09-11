@@ -1,3 +1,6 @@
+---
+lark_doc_url: https://longcheer.feishu.cn/docx/XKBGd4btCokqxmxrTRic57TWnUh
+---
 # Kotlin 第 4 课：Lambda、高阶函数与集合操作
 
 > 适用读者：已完成第 1～3 课。

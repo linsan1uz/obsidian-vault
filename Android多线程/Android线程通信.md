@@ -1,3 +1,6 @@
+---
+lark_doc_url: https://longcheer.feishu.cn/docx/FRDedn6W0osbGnxLTJScoeEknOe
+---
 
 ## 一、主线程与渲染线程的关系
 ### 1.1 职责划分
