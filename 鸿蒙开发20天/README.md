@@ -63,6 +63,12 @@
 
 ---
 
+## 课程文件存放与远程同步（Day 3 起生效）
+
+- **课程主副本**：Obsidian 库 `D:\Documents\Obsidian Vault\鸿蒙开发20天\`（GitHub 远程：obsidian-vault，main 分支）
+- **每日流程**：新课程文件直接写入该目录（`dayXX-xxx/dayXX-标题.md` + 同目录示例 `.ets`）→ 用 Obsidian MCP 的 `sync_github` 提交并推送；工作区 `harmonyos-20days\` 保留一份镜像和本进度索引
+- **MCP 会话过期的恢复方法**：向 `http://127.0.0.1:27123/mcp` POST `initialize`（不带 mcp-session-id 头；Bearer token 见 ZCode 配置 `cli/config.json` 的 `mcp.servers.obsidian`，勿写入任何同步文件），从响应头取新 `mcp-session-id`，随后调用 `sync_github`
+
 ## 环境准备（Day 0，一次性，没装环境先做这个）
 
 1. 注册华为开发者账号，从官网 developer.huawei.com 下载安装 **DevEco Studio**。
