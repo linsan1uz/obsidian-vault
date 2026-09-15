@@ -33,7 +33,8 @@
 ### 阶段一 · ArkUI 基础（Day 1–7）
 - [x] **Day 1** ArkUI 与声明式 UI · 工程结构 · 第一个页面（@Entry / @Component / build · Text / Image / Button）→ `day01-hello-arkui/`（作业暂缓，随时可补）
 - [x] **Day 2** 常用基础组件：TextInput / Toggle / Slider / Progress / Radio / Checkbox · 通用属性体系 → `day02-basic-components/`（作业暂缓）
-- [ ] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战 → `day03-linear-layout/`
+- [x] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战 → `day03-linear-layout/`（作业暂缓）
+- [ ] **Day 4** 其余布局：Stack 层叠 · Grid 网格 · List 列表 · RelativeContainer 相对布局 · position 绝对定位 → `day04-more-layouts/`
 - [ ] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战
 - [ ] **Day 4** 其余布局：Stack 层叠 · Grid 网格 · List 列表 · RelativeContainer 相对布局 · position 绝对定位
 - [ ] **Day 5** 状态管理（上）：@State 深入 · UI 刷新机制 · if/else 条件渲染 · ForEach 循环渲染
@@ -89,5 +90,6 @@
 
 - ✅ Day 1 概念课完成（作业暂缓，随时可补交）→ `day01-hello-arkui/day01-arkui与声明式ui-第一个页面.md`
 - ✅ Day 2 课程完成（作业暂缓）→ `day02-basic-components/day02-常用基础组件-输入开关与进度.md`
-- ✅ Day 3 课程已发布 → `day03-linear-layout/day03-线性布局-column与row.md`
-- ⬜ 等你交作业（Day 2 / Day 3 均可补）
+- ✅ Day 3 课程完成（作业暂缓）→ `day03-linear-layout/day03-线性布局-column与row.md`
+- ✅ Day 4 课程已发布 → `day04-more-layouts/day04-其余布局-stack-grid-list与相对定位.md`
+- ⬜ 等你交作业（Day 2 / 3 / 4 均可补）
