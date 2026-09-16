@@ -38,15 +38,15 @@ Day 2 学了最小用法，今天补全心智模型：
 @State list: TodoItem[] = [...]                          // 对象数组
 ```
 
-| 操作 | 刷新？ | 原因 |
-|------|--------|------|
-| `this.count = 1` / `this.count++` | ✅ | 整体赋值 |
-| `this.user.age = 19` | ✅ | 对象**第一层**属性赋值 |
-| `this.user = new UserProfile(...)` | ✅ | 整体替换，永远有效 |
-| `this.list.push(x)` / `pop` / `splice` / `this.list[0] = x` | ✅ | 数组项的增删改（第一层） |
-| `this.user.address.city = 'x'` | ❌ | 对象**第二层**，观察不到 |
-| `this.list[0].done = true` | ❌ | 数组元素的属性 = 第二层，观察不到 |
-| `let c = this.count; c++` | ❌ | 没碰状态本身 |
+| 操作                                                          | 刷新？ | 原因                 |
+| ----------------------------------------------------------- | --- | ------------------ |
+| `this.count = 1` / `this.count++`                           | ✅   | 整体赋值               |
+| `this.user.age = 19`                                        | ✅   | 对象**第一层**属性赋值      |
+| `this.user = new UserProfile(...)`                          | ✅   | 整体替换，永远有效          |
+| `this.list.push(x)` / `pop` / `splice` / `this.list[0] = x` | ✅   | 数组项的增删改（第一层）       |
+| `this.user.address.city = 'x'`                              | ❌   | 对象**第二层**，观察不到     |
+| `this.list[0].done = true`                                  | ❌   | 数组元素的属性 = 第二层，观察不到 |
+| `let c = this.count; c++`                                   | ❌   | 没碰状态本身             |
 
 **观察规则一句话：@State 只看第一层——整体赋值、对象第一层属性、数组项增删改。再深就看不见了。**
 

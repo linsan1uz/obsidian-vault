@@ -35,11 +35,8 @@
 - [x] **Day 2** 常用基础组件：TextInput / Toggle / Slider / Progress / Radio / Checkbox · 通用属性体系 → `day02-basic-components/`（作业暂缓）
 - [x] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战 → `day03-linear-layout/`（作业暂缓）
 - [x] **Day 4** 其余布局：Stack 层叠 · Grid 网格 · List 列表 · RelativeContainer 相对布局 · position 绝对定位 → `day04-more-layouts/`（作业暂缓）
-- [ ] **Day 5** 状态管理（上）：@State 深入 · UI 刷新机制 · if/else 条件渲染 · ForEach 循环渲染 → `day05-state-basics/`
-- [ ] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战
-- [ ] **Day 4** 其余布局：Stack 层叠 · Grid 网格 · List 列表 · RelativeContainer 相对布局 · position 绝对定位
-- [ ] **Day 5** 状态管理（上）：@State 深入 · UI 刷新机制 · if/else 条件渲染 · ForEach 循环渲染
-- [ ] **Day 6** 状态管理（下）：@Prop / @Link 父子通信 · @Watch 监听 · 自定义组件拆分
+- [x] **Day 5** 状态管理（上）：@State 深入 · UI 刷新机制 · if/else 条件渲染 · ForEach 循环渲染 → `day05-state-basics/`（作业暂缓）
+- [ ] **Day 6** 状态管理（下）：@Prop / @Link 父子通信 · @Watch 监听 · 自定义组件拆分 → `day06-state-communication/`
 - [ ] **Day 7** 事件与手势：onClick / onChange / onScroll · Tap / Pan / LongPress 手势 · 🏁 里程碑：**计算器**
 
 ### 阶段二 · ArkUI 进阶（Day 8–13）
@@ -93,5 +90,6 @@
 - ✅ Day 2 课程完成（作业暂缓）→ `day02-basic-components/day02-常用基础组件-输入开关与进度.md`
 - ✅ Day 3 课程完成（作业暂缓）→ `day03-linear-layout/day03-线性布局-column与row.md`
 - ✅ Day 4 课程完成（作业暂缓）→ `day04-more-layouts/day04-其余布局-stack-grid-list与相对定位.md`
-- ✅ Day 5 课程已发布 → `day05-state-basics/day05-状态管理上-state刷新机制-if与ForEach.md`
-- ⬜ 等你交作业（Day 2~5 均可补）
+- ✅ Day 5 课程完成（作业暂缓）→ `day05-state-basics/day05-状态管理上-state刷新机制-if与ForEach.md`
+- ✅ Day 6 课程已发布 → `day06-state-communication/day06-状态管理下-父子通信与组件拆分.md`
+- ⬜ 等你交作业（Day 2~6 均可补）
