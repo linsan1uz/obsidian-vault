@@ -92,4 +92,5 @@
 - ✅ Day 4 课程完成（作业暂缓）→ `day04-more-layouts/day04-其余布局-stack-grid-list与相对定位.md`
 - ✅ Day 5 课程完成（作业暂缓）→ `day05-state-basics/day05-状态管理上-state刷新机制-if与ForEach.md`
 - ✅ Day 6 课程已发布 → `day06-state-communication/day06-状态管理下-父子通信与组件拆分.md`
+- ➕ Day 6 另有 5.3flash 重写版（换"点单页"贯穿案例讲解，与初版对照阅读）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分-5.3flash.md` + `OrderDemo-5.3flash.ets`
 - ⬜ 等你交作业（Day 2~6 均可补）
