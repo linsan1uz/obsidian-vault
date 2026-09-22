@@ -36,8 +36,8 @@
 - [x] **Day 3** 线性布局 Column / Row：主轴交叉轴 · justifyContent / alignItems · space 间距 · layoutWeight 权重 · 嵌套实战 → `day03-linear-layout/`（作业暂缓）
 - [x] **Day 4** 其余布局：Stack 层叠 · Grid 网格 · List 列表 · RelativeContainer 相对布局 · position 绝对定位 → `day04-more-layouts/`（作业暂缓）
 - [x] **Day 5** 状态管理（上）：@State 深入 · UI 刷新机制 · if/else 条件渲染 · ForEach 循环渲染 → `day05-state-basics/`（作业暂缓）
-- [ ] **Day 6** 状态管理（下）：@Prop / @Link 父子通信 · @Watch 监听 · 自定义组件拆分 → `day06-state-communication/`
-- [ ] **Day 7** 事件与手势：onClick / onChange / onScroll · Tap / Pan / LongPress 手势 · 🏁 里程碑：**计算器**
+- [x] **Day 6** 状态管理（下）：@Prop / @Link 父子通信 · @Watch 监听 · 自定义组件拆分 → `day06-state-communication/`（作业暂缓）
+- [ ] **Day 7** 事件与手势：onClick / onChange / onScroll · Tap / Pan / LongPress 手势 · 🏁 里程碑：**计算器** → `day07-events-gestures/`
 
 ### 阶段二 · ArkUI 进阶（Day 8–13）
 - [ ] **Day 8** 列表与滚动：Scroll / Swiper 轮播 / Refresh 下拉刷新 · LazyForEach 与 IDataSource · 列表性能要点
@@ -91,7 +91,8 @@
 - ✅ Day 3 课程完成（作业暂缓）→ `day03-linear-layout/day03-线性布局-column与row.md`
 - ✅ Day 4 课程完成（作业暂缓）→ `day04-more-layouts/day04-其余布局-stack-grid-list与相对定位.md`
 - ✅ Day 5 课程完成（作业暂缓）→ `day05-state-basics/day05-状态管理上-state刷新机制-if与ForEach.md`
-- ✅ Day 6 课程已发布 → `day06-state-communication/day06-状态管理下-父子通信与组件拆分.md`
+- ✅ Day 6 课程完成（作业暂缓）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分.md`
 - ➕ Day 6 另有 5.3flash 重写版（换"点单页"贯穿案例讲解，与初版对照阅读）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分-5.3flash.md` + `OrderDemo-5.3flash.ets`
 - ➕ Day 6 另有 5.3 独立版（"音乐播放页"贯穿案例，自成一篇）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分-5.3.md` + `MusicPlayerDemo-5.3.ets`
-- ⬜ 等你交作业（Day 2~6 均可补）
+- ✅ Day 7 课程已发布（事件与手势 + 计算器里程碑）→ `day07-events-gestures/day07-事件与手势.md` + `GestureLab.ets` + `Calculator.ets`
+- ⬜ 等你交作业（Day 2~7 均可补）
