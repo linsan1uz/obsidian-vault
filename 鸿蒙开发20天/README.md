@@ -40,7 +40,7 @@
 - [ ] **Day 7** 事件与手势：onClick / onChange / onScroll · Tap / Pan / LongPress 手势 · 🏁 里程碑：**计算器** → `day07-events-gestures/`
 
 ### 阶段二 · ArkUI 进阶（Day 8–13）
-- [ ] **Day 8** 列表与滚动：Scroll / Swiper 轮播 / Refresh 下拉刷新 · LazyForEach 与 IDataSource · 列表性能要点
+- [x] **Day 8** 列表与滚动：Scroll / Swiper 轮播 / Refresh 下拉刷新 · LazyForEach 与 IDataSource · 列表性能要点 → `day08-lists-scroll/`
 - [ ] **Day 9** 自定义组件进阶：@Builder / @BuilderParam · @Styles / @Extend · @Require · @Reusable · 泛型组件
 - [ ] **Day 10** 页面导航：Navigation + NavPathStack 体系 · NavDestination 页面 · 参数传递 · Tabs 多页签框架
 - [ ] **Day 11** 弹窗与菜单：AlertDialog · @CustomDialog 自定义弹窗 · bindMenu / bindPopup · promptAction（Toast）
@@ -95,4 +95,5 @@
 - ➕ Day 6 另有 5.3flash 重写版（换"点单页"贯穿案例讲解，与初版对照阅读）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分-5.3flash.md` + `OrderDemo-5.3flash.ets`
 - ➕ Day 6 另有 5.3 独立版（"音乐播放页"贯穿案例，自成一篇）→ `day06-state-communication/day06-状态管理下-父子通信与组件拆分-5.3.md` + `MusicPlayerDemo-5.3.ets`
 - ✅ Day 7 课程已发布（事件与手势 + 计算器里程碑）→ `day07-events-gestures/day07-事件与手势.md` + `GestureLab.ets` + `Calculator.ets`
-- ⬜ 等你交作业（Day 2~7 均可补）
+- ✅ Day 8 课程完成（三课时：Scroll/Swiper → Refresh/分页 → LazyForEach/IDataSource，含 indicator 旧 API 错题）→ `day08-lists-scroll/day08-列表与滚动.md` + `NewsListDemo.ets`
+- ⬜ 等你交作业（Day 2~8 均可补）
