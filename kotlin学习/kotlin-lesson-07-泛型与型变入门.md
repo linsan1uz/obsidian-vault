@@ -189,15 +189,15 @@ startActivity<DetailActivity>()
 
 ## 六、对照速查表
 
-| Java | Kotlin |
-|---|---|
-| `class Box<T>` | `class Box<T>`（写法几乎一样） |
-| `<? extends T>` 上界通配 | `out T`（声明处型变） |
-| `<? super T>` 下界通配 | `in T` |
-| `List<?>` | `List<*>` |
-| 无法在运行时拿 `T.class` | `inline fun <reified T>` + `T::class` |
-| `T extends Comparable` | `<T : Comparable<T>>` |
-| PECS（Producer Extends, Consumer Super） | `out` 生产者 / `in` 消费者 |
+| Java                                   | Kotlin                                |
+| -------------------------------------- | ------------------------------------- |
+| `class Box<T>`                         | `class Box<T>`（写法几乎一样）                |
+| `<? extends T>` 上界通配                   | `out T`（声明处型变）                        |
+| `<? super T>` 下界通配                     | `in T`                                |
+| `List<?>`                              | `List<*>`                             |
+| 无法在运行时拿 `T.class`                      | `inline fun <reified T>` + `T::class` |
+| `T extends Comparable`                 | `<T : Comparable<T>>`                 |
+| PECS（Producer Extends, Consumer Super） | `out` 生产者 / `in` 消费者                  |
 
 Java 的通配符写在**使用处**（`List<? extends Number>`）；Kotlin 的 `out`/`in` 写在**声明处**（`interface List<out E>`），用的时候干净很多——这叫**声明处型变**。
 

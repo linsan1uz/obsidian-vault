@@ -52,7 +52,7 @@ class Dog : Animal() {
 abstract class Vehicle(val wheels: Int) {      // 抽象类：不能实例化，可以有构造函数和状态
     abstract fun drive()                        // 抽象方法：没方法体，子类必须实现
     fun horn() = "按喇叭"                       // 普通方法照常
-}
+} 
 
 interface Refuelable {
     val fuelType: String                        // 抽象属性：只有声明，没值
@@ -98,10 +98,10 @@ class Person(val name: String) {           // 主构造函数
 
 **`init` ≠ Java 静态块**（高频混淆）：
 
-| | 执行时机 | 执行次数 |
-|---|---|---|
-| Java `static { }` | 类加载时 | 整个类一辈子 1 次 |
-| Kotlin `init { }` | 每次构造对象时 | 创建几个执行几次 |
+|                        | 执行时机    | 执行次数         |
+| ---------------------- | ------- | ------------ |
+| Java `static { }`      | 类加载时    | 整个类一辈子 1 次   |
+| Kotlin `init { }`      | 每次构造对象时 | 创建几个执行几次     |
 | Java 不带 static 的 `{ }` | 每次构造对象时 | 才是 init 的对应物 |
 
 类级别"只跑一次"的活儿归 `companion object`。口诀：**init = 每个对象一次（构造函数的身体）；companion object = 类一次（static 的替身）**。
@@ -160,16 +160,16 @@ final（默认，什么都不写） < sealed < abstract < open
 
 ## 七、对照速查表
 
-| Java | Kotlin |
-|---|---|
-| `class Animal` 默认可继承 | 必须 `open class Animal` |
-| `@Override` 可选注解 | `override` 强制关键字 |
-| `final` 方法防重写 | 默认就是 final，要重写先 `open` |
-| `interface` + `default` 方法 | 接口方法直接写方法体 |
-| `extends X implements Y` | `: X(), Y`（类带括号，接口不带） |
-| 多个构造函数重载 | 主构造 + `constructor` 从构造（或 `@JvmOverloads`） |
-| `static { }` 类加载执行一次 | `companion object`（`init` 是每个对象一次） |
-| package-private | `internal`（模块级） |
+| Java                       | Kotlin                                     |
+| -------------------------- | ------------------------------------------ |
+| `class Animal` 默认可继承       | 必须 `open class Animal`                     |
+| `@Override` 可选注解           | `override` 强制关键字                           |
+| `final` 方法防重写              | 默认就是 final，要重写先 `open`                     |
+| `interface` + `default` 方法 | 接口方法直接写方法体                                 |
+| `extends X implements Y`   | `: X(), Y`（类带括号，接口不带）                      |
+| 多个构造函数重载                   | 主构造 + `constructor` 从构造（或 `@JvmOverloads`） |
+| `static { }` 类加载执行一次       | `companion object`（`init` 是每个对象一次）         |
+| package-private            | `internal`（模块级）                            |
 
 ## 八、本课练习及参考答案
 
