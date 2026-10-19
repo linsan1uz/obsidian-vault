@@ -79,12 +79,12 @@ fun good() {
 
 协程必须活在**作用域（Scope）**里——规定"这批协程的生命周期跟谁走"。Android 里常用：
 
-| 作用域 | 跟谁绑定 | 典型用途 |
-|---|---|---|
-| `lifecycleScope` | Activity / Fragment | UI 相关，界面销毁自动取消 |
-| `viewModelScope` | ViewModel | 业务请求，ViewModel 清掉时取消 |
-| `GlobalScope` | 进程级 | ⚠️ 几乎别用，难取消、易泄漏 |
-| `runBlocking { }` | 当前线程 | 演示、测试；**App 正式代码别用** |
+| 作用域               | 跟谁绑定                | 典型用途                 |
+| ----------------- | ------------------- | -------------------- |
+| `lifecycleScope`  | Activity / Fragment | UI 相关，界面销毁自动取消       |
+| `viewModelScope`  | ViewModel           | 业务请求，ViewModel 清掉时取消 |
+| `GlobalScope`     | 进程级                 | ⚠️ 几乎别用，难取消、易泄漏      |
+| `runBlocking { }` | 当前线程                | 演示、测试；**App 正式代码别用** |
 
 ### 1. `launch`：开火不管（返回 `Job`）
 
