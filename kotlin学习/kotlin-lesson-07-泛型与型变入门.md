@@ -241,3 +241,55 @@ println(mixed.firstIs<Int>())      // 1
 ---
 
 **下一课预告（第 8 课）：协程入门** —— `suspend`、`launch`/`async`、结构化并发，彻底告别回调地狱（第 1 课路线图里预告过的那一块）。
+
+---
+
+## 答疑补充
+
+### 1. `class Holder<T>(val value: T)` 为什么这么写？
+
+这是「泛型 + 主构造」合在一起：`<T>` 声明类型参数，`(val value: T)` 是主构造，`val` 让参数直接变成属性。展开相当于：
+
+```kotlin
+class Holder<T> {
+    val value: T
+    constructor(value: T) { this.value = value }
+}
+```
+
+`Holder("hi")` 推断出 `T = String`，`Holder(1)` 推断出 `T = Int`。
+
+### 2. `fun doubleOf(x: T): Double = x.toDouble() * 2` 哪里不对？
+
+函数签名上没有声明 `<T>`，会报 `Unresolved reference: T`；而且任意 `T` 不一定有 `toDouble()`，要加上界：
+
+```kotlin
+fun <T : Number> doubleOf(x: T): Double = x.toDouble() * 2
+
+doubleOf(3)      // 6.0
+doubleOf(1.5f)   // 3.0
+```
+
+如果写在已经声明了 `<T : Number>` 的类里，成员函数可以直接共用类上的 `T`。
+
+### 3. `reified` 扩展函数 `firstIs`
+
+```kotlin
+inline fun <reified T> List<*>.firstIs(): T? =
+    firstOrNull()?.let { if (it is T) it else null }
+```
+
+- `inline`：函数体插入到调用处，运行时才拿得到 `T` 的具体类型。
+- `reified T`：允许写 `it is T`；普通泛型会被擦除，做不到。
+- `List<*>.`：接收者是任意元素类型的列表。
+- 取第一个元素，是 `T` 就返回（自动转型），否则返回 `null`。
+
+```kotlin
+val mixed: List<Any> = listOf(1, "hi", 2.0)
+val n: Int? = mixed.firstIs()      // 1
+val s: String? = mixed.firstIs()   // null（第一个元素是 1，不是 String）
+```
+
+### 4. 为什么 `MutableList` 不能标 `out`？
+
+如果允许 `MutableList<String>` 当成 `MutableList<Any>`，别人就能往里 `add(1)`，把 `Int` 塞进只该装 `String` 的列表。可变列表又读又写，只能保持不变。

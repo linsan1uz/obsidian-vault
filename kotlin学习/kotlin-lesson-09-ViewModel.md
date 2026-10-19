@@ -223,3 +223,19 @@ class UserViewModel : ViewModel() {
 **下一课预告**：两条路任选——
 - **回到第 8 课协程**，接上 `viewModelScope` + `withContext(Dispatchers.IO)`，在 ViewModel 里真正发网络请求；
 - 或者 **LiveData / StateFlow 深入**：`map`/`switchMap`、一次性事件怎么处理、`StateFlow` 替换 LiveData 的标准写法。
+
+---
+
+## 答疑补充：ViewModel 比 Activity 活得久，那它归谁？
+
+它归 **`ViewModelStore`** 管，属于「这个页面」，而不是某一个 Activity 对象。
+
+1. `ComponentActivity`（`AppCompatActivity` 的父类）实现了 `ViewModelStoreOwner`，自带一个 `ViewModelStore`，可以理解成 `Map<String, ViewModel>`。`by viewModels()` 就是去这个 Map 里取，取不到才新建。
+2. 转屏时旧 Activity 被销毁，系统通过 `onRetainNonConfigurationInstance()` 把整个 `ViewModelStore` 暂存起来，新 Activity 创建时接过来，所以取到的还是原来那个 ViewModel。
+3. 只有页面真正结束（返回键 / `finish()`，此时 `isChangingConfigurations == false`），才会 `ViewModelStore.clear()`，逐个调用 `onCleared()`。
+
+口诀：**Activity 只是 ViewModel 的「临时房东」，真正的主人是页面的生命周期。** Fragment 同理，它的 `ViewModelStore` 由 `FragmentManager` 托管。
+
+### 示例项目
+
+完整示例在 `C:\Users\Linsan\AndroidStudioProjects\coroutineStudy` 的 `app/src/main/java/com/fqf/coroutinestudy/viewmodel/`：普通字段、ViewModel、ViewModel + SavedStateHandle 三种计数并排对比，`onDestroy` 会打印 `isChangingConfigurations`。

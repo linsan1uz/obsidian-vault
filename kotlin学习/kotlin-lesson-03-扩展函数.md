@@ -205,3 +205,35 @@ val regex = """\d{3}-\d{4}"""         // 三引号原始字符串，写正则不
 
 ---
 
+
+---
+
+## 答疑补充：扩展函数写在哪里？
+
+一般写在**顶层**，也就是直接写在 `.kt` 文件里、不放进任何类，常见做法是单独建一个文件，比如 `ViewExt.kt`：
+
+```kotlin
+// 文件：ViewExt.kt
+package com.example.util
+
+import android.view.View
+
+fun View.gone() {
+    this.visibility = View.GONE   // this 就是调用它的那个 View
+}
+
+fun String.isPhone(): Boolean = length == 11 && all { it.isDigit() }
+```
+
+使用时像调用自带方法一样：
+
+```kotlin
+import com.example.util.gone
+import com.example.util.isPhone
+
+button.gone()
+"13800138000".isPhone()   // true
+```
+
+- 在别的包里用要 `import` 这个函数，同一个包里不用。
+- 扩展函数也能写在类里面，但那样只能在这个类内部用，所以平时基本都写在顶层。

@@ -164,3 +164,36 @@ object Counter {
 
 ---
 
+
+---
+
+## 答疑补充：有主构造 vs 无主构造
+
+- **有主构造**：参数前加 `val`/`var` 就直接成为属性，构造方法也一并生成，不用自己写字段和构造方法。
+  ```kotlin
+  class User(val name: String, var age: Int)
+  ```
+- 不加 `val`/`var` 的参数（`class User(name: String)`）只是构造参数，只能在 `init` 或属性初始化里用，不会变成属性。
+- **无主构造**：类名后不带括号，属性要自己在类体里声明，再用 `constructor` 写次构造（像 Java）：
+  ```kotlin
+  class User {
+      val name: String
+      var age: Int
+      constructor(name: String, age: Int) {
+          this.name = name
+          this.age = age
+      }
+  }
+  ```
+- 一般只在需要多种构造方式时才这样写，比如继承 Android 的 `View`。平时优先用主构造。
+
+### `@JvmOverloads`
+
+Kotlin 的默认参数在 Java 里不会自动生成重载。加上 `@JvmOverloads` 后，编译器会按默认参数从右往左生成一串 Java 能用的重载方法：
+
+```kotlin
+@JvmOverloads
+fun toast(msg: String, duration: Int = Toast.LENGTH_SHORT) { ... }
+```
+
+Java 里就能写 `toast("hi")` 和 `toast("hi", Toast.LENGTH_LONG)`。纯 Kotlin 项目一般用不到，混编、写库或自定义 View（构造函数）时才需要。
