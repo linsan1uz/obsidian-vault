@@ -204,3 +204,38 @@ app/src/test/java/com/fqf/coroutinestudy/livedata/LiveDataDemoViewModelTest.kt
 ---
 
 **下一课预告**：继续第 11 课协程进阶 / Flow（若已学过可直接做 Room）。
+
+
+---
+
+## 💬 课后问答：`load()` 和 `loadWithPostValue()` 有什么区别？
+
+两个方法做的事一样，都是假加载完以后更新 `_message`。区别在**协程跑在哪个线程上**，所以写 LiveData 的方式也不一样。
+
+```kotlin
+// load()：主线程启动，耗时部分切到 IO，回到主线程用 value
+viewModelScope.launch {                       // 默认在主线程
+    _loading.value = true
+    val result = withContext(Dispatchers.IO) { delay(3000); "..." }  // 只有这段在 IO
+    _message.value = result                   // 已经回到主线程
+}
+
+// loadWithPostValue()：整个协程都在 IO 线程，只能用 postValue
+viewModelScope.launch(Dispatchers.IO) {
+    _loading.postValue(true)
+    delay(2000)
+    _message.postValue("...")                 // 子线程写 value 会崩溃
+}
+```
+
+| | `value =` | `postValue()` |
+|---|---|---|
+| 能在哪个线程调用 | 只能在主线程 | 任何线程 |
+| 生效时机 | 同步，立刻生效，下一行就能读到新值 | 异步，排进主线程队列，稍后才生效 |
+| 连续调用 | 每次都通知观察者 | ⭐ 主线程还没处理时连发多次，只有最后一次生效 |
+
+- `postValue(true)` 后面紧跟着 `postValue(false)`，界面可能根本不会显示 loading。
+- `load()` 开头有 `if (_loading.value == true) return`，可以防止连点重复加载；`loadWithPostValue()` 没有。
+- **推荐 `load()` 的写法**：在主线程启动，耗时部分用 `withContext(IO)` 包起来，状态都用 `value` 改。`postValue` 只在确实身处后台线程、拿不到协程时使用，比如老的回调 API。
+
+> 口诀：**主线程 value，子线程 post；post 是异步、会合并，连发只认最后一次。**
