@@ -174,6 +174,8 @@ app/src/test/java/com/fqf/coroutinestudy/livedata/LiveDataDemoViewModelTest.kt
 
 运行：`gradlew assembleDebug testDebugUnitTest`（`JAVA_HOME` 指向 Android Studio 的 JBR）。
 
+`app/build.gradle.kts` 里加了 `testOptions { unitTests.isReturnDefaultValues = true }`，否则 JVM 单测调用 `Log.d` 会报 `Method d not mocked`。现有 9 个单测 + 本课 3 个 = **12 个全部通过**。
+
 ---
 
 ## 六、和第 10 课的衔接
