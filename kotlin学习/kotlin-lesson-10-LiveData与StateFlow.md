@@ -9,13 +9,13 @@
 
 第 9 课的 `MutableLiveData` 够用，但现代 Android（尤其 Compose）更推荐 **Kotlin Flow 家族**：
 
-| | LiveData | StateFlow |
-|---|---|---|
-| 属于 | AndroidX Lifecycle | Kotlin 协程库（跨平台） |
-| 当前值 | 可能还没设过（`value` 可 null） | **永远有**一个当前值 |
-| 观察方式 | `observe(LifecycleOwner)` | `collect`（协程） / Compose 里 `collectAsState()` |
-| 线程 | `value` 必须主线程，后台用 `postValue` | 任意线程都能 `_count.value =` |
-| 测试 | 要 InstantTaskExecutorRule 等 | 普通协程测试即可 |
+|      | LiveData                      | StateFlow                                    |
+| ---- | ----------------------------- | -------------------------------------------- |
+| 属于   | AndroidX Lifecycle            | Kotlin 协程库（跨平台）                              |
+| 当前值  | 可能还没设过（`value` 可 null）        | **永远有**一个当前值                                 |
+| 观察方式 | `observe(LifecycleOwner)`     | `collect`（协程） / Compose 里 `collectAsState()` |
+| 线程   | `value` 必须主线程，后台用 `postValue` | 任意线程都能 `_count.value =`                      |
+| 测试   | 要 InstantTaskExecutorRule 等   | 普通协程测试即可                                     |
 
 三个常见动机：
 
@@ -234,3 +234,30 @@ fun onSave() {
 **下一课预告**：两条路任选——
 - **回到第 8 课协程加深**：`withContext`、异常处理，再学 Flow 操作符（`map` / `filter` / `flatMapLatest`）；
 - 或者 **Room + Flow**：数据库查询直接暴露 `Flow<List<Entity>>`，和本课 StateFlow 接到同一套 UI 收集写法。
+
+
+---
+
+## 💬 课后问答：LiveData 是用来干嘛的？
+
+LiveData 是一个**能被观察、并且知道生命周期的数据盒子**。它主要用来把 ViewModel 里的数据交给 Activity 或 Fragment 显示，数据一变，界面就自动刷新。
+
+```kotlin
+// ViewModel 里
+private val _count = MutableLiveData(0)
+val count: LiveData<Int> = _count        // 对外只读
+fun add() { _count.value = (_count.value ?: 0) + 1 }
+
+// Activity 里
+vm.count.observe(this) { n -> countText.text = "点了 $n 次" }
+```
+
+它解决了三件事：
+
+1. **数据变了自动通知**：不用每次手动改 TextView。
+2. **懂生命周期** ⭐：页面在后台时不推送；页面销毁时自动取消观察，不会内存泄漏，也不会更新已经不存在的 View。
+3. **配合 ViewModel 扛住屏幕旋转**：Activity 重建后重新 `observe`，马上拿到最新的值。
+
+新项目更推荐 StateFlow（见本课正文）：它属于 Kotlin 协程体系，能用 `map`、`combine` 等 Flow 操作符，在 Compose 里也更顺手。LiveData 主要在老项目和 XML 界面里常见。
+
+> 口诀：**LiveData 是"懂生命周期的可观察数据"，新代码用 StateFlow + `repeatOnLifecycle` 替代它。**

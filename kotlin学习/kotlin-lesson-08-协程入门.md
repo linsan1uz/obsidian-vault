@@ -108,11 +108,11 @@ lifecycleScope.launch {
 
 对比：
 
-| | `launch` | `async` |
-|---|---|---|
+|     | `launch`     | `async`                |
+| --- | ------------ | ---------------------- |
 | 返回值 | `Job`（只表示任务） | `Deferred<T>`（能取出 `T`） |
-| 取结果 | 无 | `await()` |
-| 适用 | 副作用、刷 UI | 需要返回值、并行拼结果 |
+| 取结果 | 无            | `await()`              |
+| 适用  | 副作用、刷 UI     | 需要返回值、并行拼结果            |
 
 口诀：**不要结果用 launch，要结果用 async + await。**
 
@@ -218,14 +218,14 @@ lifecycleScope.launch {
 
 ## 六、对照速查表
 
-| Java / 旧 Android | Kotlin 协程 |
-|---|---|
-| 回调嵌套 / `AsyncTask` | `launch { }` 顺序写 |
-| `Thread.sleep` | `delay`（挂起不堵线程） |
+| Java / 旧 Android     | Kotlin 协程                              |
+| -------------------- | -------------------------------------- |
+| 回调嵌套 / `AsyncTask`   | `launch { }` 顺序写                       |
+| `Thread.sleep`       | `delay`（挂起不堵线程）                        |
 | `Executor` + 回调切回主线程 | `withContext(Dispatchers.IO)` 自动回到原上下文 |
-| 难取消的后台任务 | `Job.cancel()` / Scope 生命周期自动取消 |
-| `Future.get()` | `async { }.await()` |
-| 忘记切线程改 UI 崩 | Main 上 launch，IO 用 withContext |
+| 难取消的后台任务             | `Job.cancel()` / Scope 生命周期自动取消        |
+| `Future.get()`       | `async { }.await()`                    |
+| 忘记切线程改 UI 崩          | Main 上 launch，IO 用 withContext         |
 
 ## 七、本课练习及参考答案
 
