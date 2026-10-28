@@ -261,3 +261,69 @@ vm.count.observe(this) { n -> countText.text = "点了 $n 次" }
 新项目更推荐 StateFlow（见本课正文）：它属于 Kotlin 协程体系，能用 `map`、`combine` 等 Flow 操作符，在 Compose 里也更顺手。LiveData 主要在老项目和 XML 界面里常见。
 
 > 口诀：**LiveData 是"懂生命周期的可观察数据"，新代码用 StateFlow + `repeatOnLifecycle` 替代它。**
+
+
+---
+
+## 💬 课后问答：LiveData 怎么用？
+
+三步走：**ViewModel 里放数据 → 对外只读 → 界面 observe**。
+
+### ① 依赖（lifecycle 2.11.0）
+
+```kotlin
+implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.11.0")
+implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
+implementation("androidx.activity:activity-ktx:1.13.0")   // by viewModels()
+```
+
+### ② ViewModel：内部可写，外部只读
+
+```kotlin
+class CounterViewModel : ViewModel() {
+    private val _count = MutableLiveData(0)
+    val count: LiveData<Int> = _count
+
+    fun add() { _count.value = (_count.value ?: 0) + 1 }   // 主线程用 value
+
+    fun loadFromNet() = viewModelScope.launch(Dispatchers.IO) {
+        val n = 100                       // 假装网络结果
+        _count.postValue(n)               // 子线程用 postValue
+    }
+}
+```
+
+### ③ Activity / Fragment 观察
+
+```kotlin
+class CounterActivity : AppCompatActivity() {
+    private val vm: CounterViewModel by viewModels()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_counter)
+        vm.count.observe(this) { n -> findViewById<TextView>(R.id.tv).text = "点了 $n 次" }
+        findViewById<Button>(R.id.btn).setOnClickListener { vm.add() }
+    }
+}
+// Fragment 里一定用 viewLifecycleOwner ⭐
+vm.count.observe(viewLifecycleOwner) { ... }
+```
+
+### ④ 进阶写法
+
+```kotlin
+val label: LiveData<String> = count.map { "当前 $it" }                     // 转换
+val user: LiveData<User> = userId.switchMap { id -> repo.getUser(id) }   // 切换数据源
+val users: LiveData<List<User>> = liveData { emit(repo.fetchUsers()) }   // 构造器里写挂起代码
+val fromFlow: LiveData<Int> = someFlow.asLiveData()                       // Flow → LiveData
+```
+
+### ⚠️ 易错点
+
+- 子线程写 `value =` 会崩溃，子线程用 `postValue`。
+- **粘性**：新观察者注册后会立刻收到最后一个值。Toast、跳转这种一次性事件不要用 LiveData，改用 SharedFlow 或 Channel（见第 10、20 课）。
+- Fragment 里写 `observe(this)` 会重复观察，要用 `viewLifecycleOwner`。
+
+> 示例：`coroutineStudy` 项目的 `viewmodel/CounterActivity.kt`（第 9 课，Logcat tag `ViewModelDemo`）。
+>
+> 口诀：**私有 Mutable，公开 LiveData；主线程 value，子线程 post；Fragment 用 viewLifecycleOwner。**
