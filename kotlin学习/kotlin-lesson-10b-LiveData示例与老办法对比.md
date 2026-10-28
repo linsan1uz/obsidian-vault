@@ -239,3 +239,35 @@ viewModelScope.launch(Dispatchers.IO) {
 - **推荐 `load()` 的写法**：在主线程启动，耗时部分用 `withContext(IO)` 包起来，状态都用 `value` 改。`postValue` 只在确实身处后台线程、拿不到协程时使用，比如老的回调 API。
 
 > 口诀：**主线程 value，子线程 post；post 是异步、会合并，连发只认最后一次。**
+
+
+---
+
+## 💬 课后问答：`_loading.value = true` 是在 setValue 吗？这是 Kotlin 的写法吗？
+
+是的，**这就是在调用 `setValue(true)`**，是 Kotlin 访问 Java getter/setter 的写法。
+
+LiveData 是用 Java 写的，类里只有一对普通方法：
+
+```java
+public T getValue() { ... }
+protected void setValue(T value) { ... }   // 到了 MutableLiveData 里改成 public
+```
+
+⭐ Kotlin 的规则：Java 类里有 `getXxx()` / `setXxx()` 这样的方法，在 Kotlin 里就能当成属性 `xxx` 来用，编译后还是调那两个方法。
+
+```kotlin
+_loading.value = true          // 编译后等于 _loading.setValue(true)
+val v = _loading.value         // 编译后等于 _loading.getValue()
+_loading.setValue(true)        // 也对，只是 IDE 会提示你改成属性写法
+```
+
+同理：`textView.text = "hi"` 实际调的是 `setText()`，`intent.extras` 调的是 `getExtras()`。
+
+### 两个细节
+
+- **为什么对外暴露 `LiveData` 后，外面改不了值？** `LiveData.setValue` 是 `protected`，在外面只能用 `value` 读，写不了；只有 `MutableLiveData` 把它改成了 `public`。这就是"私有 Mutable、公开 LiveData"能起作用的原因。
+- **为什么要写 `_count.value ?: 0`？** Java 的 `getValue()` 可能返回 null，所以 Kotlin 里拿到的 `value` 是可空的 `Int?`，要用 `?:` 给一个默认值。
+- `postValue` 没有对应的 `getXxx`，它就只是个普通方法，只能写成 `postValue(...)`。
+
+> 口诀：**Java 的 get/set 到了 Kotlin 就是属性；`.value =` 就是 setValue。**
