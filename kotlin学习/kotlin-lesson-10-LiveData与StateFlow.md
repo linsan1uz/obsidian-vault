@@ -327,3 +327,23 @@ val fromFlow: LiveData<Int> = someFlow.asLiveData()                       // Flo
 > 示例：`coroutineStudy` 项目的 `viewmodel/CounterActivity.kt`（第 9 课，Logcat tag `ViewModelDemo`）。
 >
 > 口诀：**私有 Mutable，公开 LiveData；主线程 value，子线程 post；Fragment 用 viewLifecycleOwner。**
+
+
+---
+
+## 💬 课后问答：LiveData 是用来替代谁的？
+
+LiveData 出现以前，"后台拿到数据 → 通知界面刷新"主要靠这几种办法：
+
+| 以前的做法 | 问题 |
+|---|---|
+| 接口回调 + `Handler` / `runOnUiThread` | 要手动切主线程；页面销毁后回调照样来，碰 View 会崩或者泄漏 Activity |
+| 在 `onStart`/`onStop` 手动注册、反注册监听（EventBus、广播） | 忘写一行就泄漏 |
+| Loader（`AsyncTaskLoader`、`CursorLoader`） | 老的"扛旋转加载器"，写法繁琐，已废弃，ViewModel + LiveData 就是它的替代 ⭐ |
+| 只为"推数据给界面"引入 RxJava | 要自己 `dispose`，也不懂生命周期 |
+
+**LiveData 替代的是"手动管生命周期的回调/监听"**，让通知自动跟着页面生命周期走。
+
+后来它自己也被替代了：有了协程以后，官方推荐 **StateFlow**（见本课正文）。
+
+> 演进线：**回调 / Loader → LiveData → StateFlow**
