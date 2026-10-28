@@ -84,7 +84,7 @@ override fun onStop() {
 |---|---|
 | ✅ Single / Observable | `subscribeOn(IO)` + `observeOn(Main)`，订阅丢进 `CompositeDisposable`，`onDestroy` 里 `clear()` |
 | ❌ 忘记 dispose | 订阅**不**放进袋子；点完立刻返回 → 约 3s 后 Logcat：`死 Activity 仍被 Rx 回调` |
-| 桥接 Rx → LiveData | `Observable.toFlowable()` + `LiveDataReactiveStreams.fromPublisher`，LiveData 观察者销毁时自动取消上游 |
+| 桥接 Rx → LiveData | `Observable.toFlowable()` + `Publisher.toLiveData()`（lifecycle-reactivestreams 2.11），观察者销毁时自动取消上游 |
 
 正确写法要点：
 
