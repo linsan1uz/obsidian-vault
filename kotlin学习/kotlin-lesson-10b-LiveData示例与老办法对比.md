@@ -271,3 +271,87 @@ _loading.setValue(true)        // 也对，只是 IDE 会提示你改成属性�
 - `postValue` 没有对应的 `getXxx`，它就只是个普通方法，只能写成 `postValue(...)`。
 
 > 口诀：**Java 的 get/set 到了 Kotlin 就是属性；`.value =` 就是 setValue。**
+
+
+---
+
+## 💬 课后问答：observe 的参数、LiveData 与 EventBus
+
+### ① `observe` 还能传什么参数？
+
+```kotlin
+fun observe(owner: LifecycleOwner, observer: Observer<in T>)
+fun observeForever(observer: Observer<in T>)        // 没有 owner
+```
+
+第一个参数只要是 **`LifecycleOwner`** 就行，不一定是 Activity：
+
+| 传入 | 说明 |
+|---|---|
+| `this`（`ComponentActivity` / `AppCompatActivity`） | 最常见 |
+| `viewLifecycleOwner`（Fragment 里）⭐ | Fragment 里应该用这个，跟着 View 的生命周期走 |
+| `this`（Fragment 本身） | 能用但不推荐，View 重建时会重复观察 |
+| `navBackStackEntry` | 跟着导航页的生命周期走 |
+| `ProcessLifecycleOwner.get()` | 整个 App 的前后台生命周期 |
+| `LifecycleService` | 能观察 LiveData 的 Service |
+| 自定义 `LifecycleOwner`（内部用 `LifecycleRegistry`） | 自己控制生命周期 |
+
+`observeForever` 不绑定生命周期，一直收数据，**用完必须手动 `removeObserver`**，否则会泄漏。
+
+### ② 为什么说 LiveData 能代替 EventBus？
+
+以前很多人用 EventBus 只是为了"后台拿到数据通知界面"或者"Fragment 之间传数据"。这两件事现在可以这样做：
+- ViewModel 加 LiveData/StateFlow：数据变了界面自动收到，还懂生命周期，不用手动 register/unregister。
+- 共享 ViewModel（`by activityViewModels()`）：同一个 Activity 下的多个 Fragment 观察同一份数据。
+
+所以替代的是**页面内、页面之间**的那部分通信。LiveData 是粘性的，也不适合做全局事件总线。
+
+### ③ 跨模块、多对多的解耦通信，谁来代替？
+
+自己写一个单例，里面放 `SharedFlow`：
+
+```kotlin
+// common 模块
+sealed interface AppEvent {
+    data object LoggedOut : AppEvent
+    data class CartChanged(val count: Int) : AppEvent
+}
+
+@Singleton
+class AppEventBus @Inject constructor() {
+    private val _events = MutableSharedFlow<AppEvent>(extraBufferCapacity = 16)
+    val events: SharedFlow<AppEvent> = _events
+    suspend fun emit(e: AppEvent) = _events.emit(e)
+}
+
+// 任意模块：发
+bus.emit(AppEvent.LoggedOut)
+
+// 任意模块：收（跟着生命周期）
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        bus.events.collect { e -> /* ... */ }
+    }
+}
+```
+
+如果是"共享状态"，比如登录状态、购物车数量，更推荐放进 **Repository 里的 StateFlow**，让它当唯一数据源，而不是发事件。
+
+### ④ Hilt 不是解决依赖注入的吗？
+
+对，Hilt 本身不负责通信。它在这里只做一件事：**把同一个 `@Singleton` 的 `AppEventBus` 实例交给每个模块**。各模块只依赖 common 模块里的这个类，彼此不直接引用，这样就解耦了。真正收发事件的是 SharedFlow。
+
+### ⑤ 安卓官方有没有自己的 EventBus 替代？
+
+**没有现成的库。** 以前官方的 `LocalBroadcastManager` 已经废弃。官方建议按场景用：
+
+| 场景 | 官方方案 |
+|---|---|
+| ViewModel → 界面 | StateFlow / LiveData |
+| Fragment ↔ Fragment | 共享 ViewModel，或 Fragment Result API（`setFragmentResult`） |
+| 页面回传结果 | Activity Result API（`registerForActivityResult`） |
+| 一次性事件 | 用 UI 状态表示，或用 Channel / SharedFlow |
+| 跨模块、全局 | Repository 的 StateFlow，或自己写的 SharedFlow 单例（交给 Hilt 注入） |
+| 跨进程 | 系统广播 / AIDL |
+
+> 口诀：**页面内用 StateFlow，Fragment 间用共享 ViewModel 或 FragmentResult，全局用 SharedFlow 单例，Hilt 只负责把同一个实例送到各处。**
