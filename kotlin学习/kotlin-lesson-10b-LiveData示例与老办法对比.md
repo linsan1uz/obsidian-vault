@@ -15,15 +15,17 @@
 | `app/.../livedata/OldWayDataSource.kt` | ② 用的应用内单例监听列表 |
 | `app/.../livedata/LiveDataDemoViewModel.kt` | LiveData / map / switchMap / liveData{} / asLiveData / 事件 |
 | `app/.../livedata/LiveDataDemoActivity.kt` | 观察 ViewModel，演示旋转与粘性坑 |
+| `app/.../livedata/RxJavaDemoActivity.kt` | RxJava 3 可运行示例：正确 dispose vs 忘记 dispose，Rx→LiveData 桥接 |
+| `app/.../res/layout/activity_rxjava_demo.xml` | RxJava 页布局 |
 | `app/.../res/layout/activity_old_way.xml` | 老办法页布局 |
 | `app/.../res/layout/activity_livedata_demo.xml` | LiveData 页布局 |
 | `app/.../test/.../livedata/LiveDataDemoViewModelTest.kt` | map / switchMap / load 单测 |
-| `MainActivity` + `activity_main.xml` | 多了「老办法示例」「LiveData 示例」两个按钮 |
+| `MainActivity` + `activity_main.xml` | 「老办法示例」「LiveData 示例」「RxJava 示例」按钮 |
 | `AndroidManifest.xml` | 注册了两个新 Activity |
 
 Logcat 统一过滤 tag：**`LiveDataDemo`**。
 
-依赖：`lifecycle-livedata-ktx 2.11.0`（已有）；Loader 通过 `appcompat → fragment → androidx.loader:loader:1.0.0` 传递进来，**没有新增 RxJava**。
+依赖：`lifecycle-livedata-ktx 2.11.0`；Loader 经 `appcompat → fragment → loader:1.0.0` 传递；RxJava **`io.reactivex.rxjava3:rxjava:3.1.12`** + **`rxandroid:3.0.2`**；桥接用 `lifecycle-reactivestreams-ktx:2.11.0`。
 
 ---
 
@@ -74,17 +76,34 @@ override fun onStop() {
 2. 它比裸 Handler 好一点：配置变化后结果会交给新 Activity。
 3. 但 API 啰嗦，官方已推荐 **ViewModel + LiveData** 替代；代码里 `@Suppress("DEPRECATION")`。
 
-### ④ RxJava（不引入依赖）
+### ④ RxJava（可运行 Demo）
+
+主界面点 **「RxJava 示例」** → `RxJavaDemoActivity`。
+
+| 按钮 | 行为 |
+|---|---|
+| ✅ Single / Observable | `subscribeOn(IO)` + `observeOn(Main)`，订阅丢进 `CompositeDisposable`，`onDestroy` 里 `clear()` |
+| ❌ 忘记 dispose | 订阅**不**放进袋子；点完立刻返回 → 约 3s 后 Logcat：`死 Activity 仍被 Rx 回调` |
+| 桥接 Rx → LiveData | `Observable.toFlowable()` + `LiveDataReactiveStreams.fromPublisher`，LiveData 观察者销毁时自动取消上游 |
+
+正确写法要点：
 
 ```kotlin
-// 仅作对照，本工程未添加 RxJava
-Observable.fromCallable { Thread.sleep(3000); "Rx 数据" }
+private val disposables = CompositeDisposable()
+
+val d = Single.fromCallable { Thread.sleep(3000); "数据" }
     .subscribeOn(Schedulers.io())
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe { text -> tvResult.text = text }  // 必须保存 Disposable，销毁时 dispose()
+    .subscribe { text -> tvResult.text = text }
+disposables.add(d)
+
+override fun onDestroy() {
+    disposables.clear()   // ⭐ 页面销毁必须清
+    super.onDestroy()
+}
 ```
 
-忘了 `dispose()` = 和忘记 `unregister` 同一类问题。
+版本：`rxjava 3.1.12`、`rxandroid 3.0.2`（Maven Central 当前稳定版）。
 
 ---
 
@@ -151,14 +170,14 @@ Activity 侧用 `repeatOnLifecycle(STARTED)` 收集 SharedFlow / Channel。
 
 ## 四、对比表
 
-| | 回调+Handler | 手动监听 | Loader | RxJava（仅推 UI） | LiveData | 再往后 |
+| | 回调+Handler | 手动监听 | Loader | RxJava 3 | LiveData | 再往后 |
 |---|---|---|---|---|---|---|
 | 旋转后数据 | 易丢 / 打到死页面 | 看你怎么存 | 能交给新页面 | 看你怎么存 | ViewModel 里还在 | StateFlow 同理 |
 | 销毁后自动停 | ❌ | 靠自己 unregister | 部分 | 靠自己 dispose | ✅ observe 自动移除 | ✅ |
 | 忘了解绑 | 泄漏/崩 | 泄漏 | — | 泄漏 | 很难忘 | 很难忘 |
 | 官方态度 | 旧 | 旧 | **Deprecated** | 可用但偏重 | 仍支持 | **新代码优先 StateFlow** |
 
-口诀：**数据放 ViewModel，界面用 observe；事件别用 LiveData，改 SharedFlow / Channel。**
+口诀：**数据放 ViewModel，界面用 observe；事件别用 LiveData，改 SharedFlow / Channel；Rx 订阅必须 dispose。**
 
 ---
 
