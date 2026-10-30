@@ -237,3 +237,68 @@ button.gone()
 
 - 在别的包里用要 `import` 这个函数，同一个包里不用。
 - 扩展函数也能写在类里面，但那样只能在这个类内部用，所以平时基本都写在顶层。
+
+---
+
+## 答疑补充：扩展函数怎么用？
+
+一句话：**给已有类型“外挂”一个方法**，调用时看起来像成员函数，但编译后其实是静态工具函数。
+
+### 1. 怎么写、怎么调
+
+```kotlin
+// 语法：fun 接收者类型.函数名(...)
+fun View.show() {
+    visibility = View.VISIBLE   // 函数体内 this = 调用它的那个 View，可省略
+}
+
+fun Context.toast(msg: String, duration: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(this, msg, duration).show()
+}
+
+// 调用点：像自带方法一样
+button.show()
+context.toast("保存成功")
+```
+
+- 接收者写在 **类型位置**（`View.`），不要写进参数括号。
+- 函数体里的 `this` 就是左边那个对象。
+
+### 2. 可空接收者
+
+```kotlin
+fun String?.safeLength(): Int = this?.length ?: 0
+
+"hi".safeLength()   // 2
+null.safeLength()   // 0，不崩
+```
+
+接收者写成 `String?` 后，连 `null` 也能点出来调用。
+
+### 3. 扩展属性（也能“加字段感”，但没有背后存储）
+
+```kotlin
+val View.isVisible: Boolean
+    get() = visibility == View.VISIBLE
+
+if (button.isVisible) { /* ... */ }
+```
+
+只有 getter/setter 逻辑，**不会真的在类里多出一块内存字段**。
+
+### 4. 三条铁律
+
+1. **盖不过真成员**：类里已有同名成员方法时，永远走成员，扩展被晾在一边。
+2. **按静态类型解析**：不多态。`val x: Any = "hi"` 时，`x` 上的扩展按 `Any` 找，不会按运行时 `String` 找。
+3. **跨包要 import**：扩展写在顶层文件（如 `ViewExt.kt`），别的包用前 `import com.xxx.show`。
+
+### 5. Android 常见例子
+
+| 写法 | 用途 |
+|---|---|
+| `fun View.show()/gone()/invisible()` | 控制可见性 |
+| `fun Context.toast(msg)` | 快速 Toast |
+| `fun Int.dp(context): Int` | dp → px |
+| `fun String?.orEmpty()`（标准库） | null 当空串 |
+
+口诀：**像成员一样用，像工具函数一样定义；能调用公开 API，改不了类的内部实现。**
