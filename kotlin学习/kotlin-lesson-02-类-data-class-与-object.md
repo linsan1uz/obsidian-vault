@@ -197,3 +197,76 @@ fun toast(msg: String, duration: Int = Toast.LENGTH_SHORT) { ... }
 ```
 
 Java 里就能写 `toast("hi")` 和 `toast("hi", Toast.LENGTH_LONG)`。纯 Kotlin 项目一般用不到，混编、写库或自定义 View（构造函数）时才需要。
+
+---
+
+## 答疑补充：private constructor 是什么意思？
+
+> Jerry 提问：下面这种写法里的 `private constructor` 是什么意思？
+
+```kotlin
+class Article private constructor(val title: String) {
+    companion object {
+        const val MAX_TITLE = 50          // 相当于 static final 常量
+
+        fun create(title: String): Article {   // 相当于 static 工厂方法
+            require(title.length <= MAX_TITLE) { "标题太长" }
+            return Article(title)
+        }
+    }
+}
+```
+
+### 一句话
+
+**`private constructor` = 主构造函数是私有的**：类外面**不能**直接写 `Article("xxx")` 来 new；只有类自己内部（含 **companion object**）能调用这个构造。
+
+### 拆开看语法
+
+```kotlin
+class Article private constructor(val title: String)
+//           ↑        ↑
+//        可见性    主构造函数
+```
+
+- 默认不写时，主构造是 public，外面随便 `Article("hi")`。
+- 写成 `private constructor` 后，外部编译会报：构造函数不可见。
+- **`private` 修饰的是构造，不是整个类。** 类本身仍是 public，外面可以声明 `Article` 类型、接收 `create` 的返回值，只是不能自己 new。
+
+对比：
+
+| 写法 | 含义 |
+|---|---|
+| `class Article(...)` | 类公开，构造也公开 |
+| `class Article private constructor(...)` | 类公开，**只能内部/伴生构造** |
+| `private class Article(...)` | **类本身**对外不可见（另一回事） |
+
+### 为什么要和 companion 一起用？
+
+伴生对象（第 2 课的 `object` / `companion object`）活在类内部，**可以调用私有构造**：
+
+```kotlin
+Article.create("Kotlin")     // ✅ 走工厂，先校验再构造
+// Article("Kotlin")         // ❌ 外部禁止，逼你走 create
+```
+
+这就是常见的**工厂模式**：
+
+1. 创建前统一校验（`require`、默认值、规范化字符串…）。
+2. 以后若改成缓存、单例、子类型，调用方仍只认 `Article.create(...)`，构造细节可藏起来。
+
+`MAX_TITLE` 放 companion 里，相当于 Java 的 `static final`；`create` 相当于 static 工厂方法。
+
+### 小练习理解
+
+```kotlin
+fun main() {
+    val a = Article.create("短标题")     // OK
+    // val b = Article("短标题")         // 编译错误
+    println(Article.MAX_TITLE)           // 50，常量仍可从外面读
+}
+```
+
+### 收束
+
+**`private constructor`：外面别直接 new，请走我提供的入口（这里是 `Article.create`）。类还能用，构造被收口了。**
