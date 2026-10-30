@@ -191,3 +191,213 @@ val i = Outer("Jerry").Inner()          // 必须先有 Outer
 ---
 
 **下一课**：若你按主线走，语法部分到第 7 课已齐；Android 主线从第 8 课协程开始。本补遗可随时回查。第 23 课起补 Paging、WorkManager 等工程专题。
+
+---
+
+## 答疑补充：lateinit 用法详解
+
+> Jerry 追问：lateinit 的用法可以再详细一点吗？
+
+### 1. 解决什么问题？
+
+有些属性在**构造时还拿不到**（要等 `onCreate`、依赖注入、测试里后赋值），又不想写成可空 `Type?` 到处 `?.`：
+
+```kotlin
+class ProfileActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityProfileBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.title.text = "资料"   // 之后像非空属性一样用
+    }
+}
+```
+
+口诀：**保证生命周期里一定会先赋值，再用；用 `lateinit` 换掉烦人的可空。**
+
+### 2. 语法与限制（必须记住）
+
+```kotlin
+lateinit var binding: ActivityProfileBinding   // ✅
+```
+
+| 规则 | 说明 |
+|---|---|
+| 只能是 **`var`** | 不能 `lateinit val` |
+| 类型**非空引用类型** | `String`、自定义类、接口都行 |
+| **不能**是可空类型 | `lateinit var s: String?` ❌ |
+| **不能**是基本类型 | `Int` / `Boolean` / `Long` 等 ❌（用普通 `var x = 0` 或可空） |
+| 不能在主构造参数里写 | 只能是类体里的属性 |
+| 不能自带自定义 getter/setter | `lateinit` 自己管底层存储 |
+
+### 3. 未初始化就用 → 直接崩
+
+```kotlin
+lateinit var token: String
+
+fun needToken() {
+    println(token)   // 若还没赋值 → UninitializedPropertyAccessException
+}
+```
+
+同模块内可先检查：
+
+```kotlin
+fun maybeUse() {
+    if (::token.isInitialized) {
+        println(token)
+    } else {
+        println("还没登录")
+    }
+}
+```
+
+注意：
+
+- `::token.isInitialized` 一般在**属性所在类内部**用（或能访问到该属性的地方）。
+- 这是防崩手段，**不是**鼓励到处判；正常流程应保证「用之前一定赋过值」。
+
+### 4. 可以多次赋值
+
+`lateinit var` 本质是可变属性，赋值不限一次：
+
+```kotlin
+lateinit var repo: UserRepository
+
+fun useFake() { repo = FakeUserRepository() }
+fun useReal() { repo = RealUserRepository() }
+```
+
+若「只应创建一次、且第一次访问时再创建」→ 更适合 `by lazy`（见下表）。
+
+### 5. `lateinit` vs `lazy`
+
+| | `lateinit var` | `by lazy { }` |
+|---|---|---|
+| 可变性 | `var`，可多次赋值 | 实质 `val`，只初始化一次 |
+| 谁赋值 | **你自己**在某处写 `x = ...` | **第一次读**时自动跑 lambda |
+| 线程 | 无内置同步 | 默认线程安全 |
+| 典型场景 | ViewBinding、`onCreate` 注入、测试后赋值、Hilt 字段注入 | 昂贵对象、真正的延迟创建 |
+| 未就绪 | 读则抛 `UninitializedPropertyAccessException` | 读就会触发初始化 |
+
+```kotlin
+// lazy：首次访问才建
+val db by lazy { Room.databaseBuilder(context, AppDatabase::class.java, "app.db").build() }
+```
+
+### 6. 和 Hilt / 测试
+
+字段注入常见写法（第 14 课会再系统讲）：
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    @Inject lateinit var userRepo: UserRepository
+    // Hilt 在合适时机注入；你在 onCreate 之后当非空用
+}
+```
+
+单元测试里也常用：先 `new` 出对象，再给 `lateinit` 属性塞 Fake。
+
+### 7. 什么时候别用？
+
+1. 值在构造时就有 → 构造参数 / 普通 `val`。
+2. 可能长期为「没有」→ 用可空 `Type?`，语义更清楚。
+3. 基本类型计数、开关 → `var count = 0`，不要硬上 `lateinit`。
+4. 「第一次用才创建、且只需一次」→ `by lazy`。
+5. 跨异步回调、说不清何时赋值 → 容易忘初始化而崩；改用可空或显式状态。
+
+### 8. 易错点再强调
+
+1. `lateinit var flag: Boolean` → 编译不过。
+2. `lateinit var name: String?` → 编译不过（可空请直接用 `var name: String? = null`）。
+3. 访问未初始化属性 → 运行时崩，不是编译期错误。
+4. 和扩展属性无关：扩展属性没有背后字段，更谈不上 `lateinit`。
+5. 能构造注入就优先构造注入；`lateinit` + 字段注入是框架妥协，不是首选设计。
+
+### 9. 和 01b 正文的关系
+
+正文第三节已给规则表与 ViewBinding 例子；本节把**限制、崩溃、`isInitialized`、多次赋值、lazy 对比、Hilt/测试、禁用场景**展开，方便单独回查。
+---
+
+## 答疑补充：`::binding.isInitialized` demo
+
+> 配合上一节：什么时候查「赋过值没有」。
+
+### 要点（先记住）
+
+1. **只对 `lateinit var` 有意义**（普通属性 / `lazy` 不用这套）。
+2. 写法是属性引用：`::binding.isInitialized`（前面两个冒号）。
+3. **通常在声明该属性的类内部**调用。
+4. 赋过值 → `true`；还没赋 → `false`。再赋值仍是 `true`。
+5. 它是**防崩检查**，不是业务状态机——别用它表达「已登录 / 未登录」这类领域状态（那种用显式 `sealed` / 可空 / StateFlow）。
+
+### Demo 1：Activity + ViewBinding
+
+```kotlin
+class DemoActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityDemoBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // inflate 前：false，此时千万别碰 binding.xxx
+        Log.d("lateinit", "before inflate: ${::binding.isInitialized}")  // false
+
+        binding = ActivityDemoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        Log.d("lateinit", "after inflate: ${::binding.isInitialized}")   // true
+        binding.title.text = "Hello"
+    }
+
+    override fun onDestroy() {
+        // Activity 销毁时属性往往仍是已初始化（对象还在）
+        // 若你另有「可空 binding + onDestroyView 置 null」的 Fragment 写法，那是另一套模式
+        Log.d("lateinit", "onDestroy: ${::binding.isInitialized}")
+        super.onDestroy()
+    }
+
+    fun safeRefreshTitle(text: String) {
+        if (::binding.isInitialized) {
+            binding.title.text = text
+        }
+    }
+}
+```
+
+Fragment + ViewBinding 更常见的是 `_binding` 可空、在 `onDestroyView` 置 `null`（第 28 课），不一定用 `lateinit`；Activity 全页 binding 用 `lateinit` + `isInitialized` 更常见。
+
+### Demo 2：纯 Kotlin（不依赖 Android）
+
+```kotlin
+class Holder {
+    private lateinit var value: String
+
+    fun ready(): Boolean = ::value.isInitialized
+
+    fun set(v: String) {
+        value = v
+    }
+
+    fun getOrNull(): String? =
+        if (::value.isInitialized) value else null
+}
+
+fun main() {
+    val h = Holder()
+    println(h.ready())        // false
+    println(h.getOrNull())    // null
+    h.set("Jerry")
+    println(h.ready())        // true
+    println(h.getOrNull())    // Jerry
+}
+```
+
+可在 [Kotlin Playground](https://play.kotlinlang.org) 直接跑 Demo 2。
+
+### 和上一节的衔接
+
+- 未初始化就读属性 → `UninitializedPropertyAccessException`。
+- 关键路径不确定时先 `isInitialized`；正常生命周期里更推荐**保证先赋值再使用**，少写分支。
