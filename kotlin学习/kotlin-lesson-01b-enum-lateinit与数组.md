@@ -401,3 +401,85 @@ fun main() {
 
 - 未初始化就读属性 → `UninitializedPropertyAccessException`。
 - 关键路径不确定时先 `isInitialized`；正常生命周期里更推荐**保证先赋值再使用**，少写分支。
+
+---
+
+## 答疑补充：KProperty 怎么理解？
+
+> Jerry 提问：KProperty 怎么理解？
+
+### 一句话
+
+**`KProperty` 是「某个属性」在反射里的句柄**——不是属性里存的值，而是指向这个属性本身的元信息对象。通过它你可以问：叫什么名字、有没有初始化、取值/赋值（在可见的前提下）。
+
+日常写业务几乎碰不到；你已经用过的 `::binding.isInitialized`，左边的 `::binding` 就是在拿这个句柄。
+
+### 和「值」的区别
+
+```kotlin
+lateinit var binding: ActivityDemoBinding
+
+binding          // 属性的【值】：那个 Binding 实例
+::binding        // 属性的【引用/句柄】：KProperty / KMutableProperty
+```
+
+口诀：**不带 `::` 拿内容；带 `::` 拿属性本身。**
+
+### 纯 Kotlin 小例子（Playground 可跑）
+
+```kotlin
+class Holder {
+    lateinit var name: String
+
+    fun demo() {
+        val prop = ::name                    // KMutableProperty0<String>
+        println(prop.name)                   // "name"
+        println(prop.isInitialized)          // false（仅 lateinit 有）
+
+        prop.set("Jerry")                    // 等价于 name = "Jerry"
+        println(prop.isInitialized)          // true
+        println(prop.get())                  // "Jerry"
+    }
+}
+
+fun main() = Holder().demo()
+```
+
+- `get()` / `set()`：通过句柄读写（可变属性才是 `KMutableProperty`，才有 `set`）。
+- `isInitialized`：挂在 lateinit 对应的句柄上（上一节 demo）。
+
+### 常见 `::` 形态（了解即可）
+
+| 写法 | 大致得到 | 含义 |
+|---|---|---|
+| `::name`（类内） | `KProperty0` / `KMutableProperty0` | 当前实例上的这个属性 |
+| `Holder::name` | `KProperty1<Holder, …>` | 「Holder 的 name 属性」，用时要带接收者 |
+| `::foo`（顶层函数） | `KFunction` | 函数引用（不是属性） |
+| `instance::name` | 绑定到某实例的属性引用 | 少见，测试/框架里可能出现 |
+
+应用层记住两格就够：`::binding` + `isInitialized`；以及「这是反射句柄」。
+
+### 和委托的关系（第 18 课预告）
+
+属性委托的约定签名里会看到 `KProperty<*>`：
+
+```kotlin
+operator fun getValue(thisRef: Any?, property: KProperty<*>): String {
+    // property.name 是被委托的属性名
+    return "..."
+}
+```
+
+那是标准库/委托约定要用元信息；**不是**让你在 Activity 里手写反射业务。
+
+### 什么时候需要关心？
+
+| 需要 | 不需要 |
+|---|---|
+| 理解 `::x.isInitialized` | 普通读写 `x` / `x = ...` |
+| 写属性委托、部分框架/序列化 | ViewModel、Repository、Compose UI |
+| 调试、学习反射 | 用 KProperty 当业务状态 |
+
+### 收束
+
+**`KProperty` = 属性的反射身份证；`::binding` 把它拿到手；`isInitialized` / `get` / `set` 是身份证上能盖的几个戳。业务代码优先直接用属性值，把反射留给框架和少数工具场景。**
