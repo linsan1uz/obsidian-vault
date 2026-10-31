@@ -202,3 +202,68 @@ binding.ok.setOnClickListener {
 ---
 
 **下一课预告（第 29 课）：Compose UI 测试** —— 和第 21 课的 VM 单测互补：对屏幕上的节点做点击与断言。
+
+---
+
+## 答疑补充：为什么 onDraw 里创建对象是内存抖动而不是 OOM
+
+> Jerry 提问：为什么在 `onDraw` 方法中创建对象会导致**内存抖动**，而不是**内存溢出**？
+
+### 一句话
+
+`onDraw` 调用极频繁（一帧可多次）。里面 `new` 的都是**短命小对象** → 堆里进进出出，触发频繁 GC → **卡顿 / 抖动（jank）**。  
+它们很快就能被回收，堆占用往往**不会持续涨上去**，所以通常**不是**一直涨到 OOM 那种溢出。
+
+### 内存抖动 vs 内存溢出
+
+| | 内存抖动（GC thrashing） | 内存溢出（OOM） |
+|---|---|---|
+| 典型原因 | 高频路径（如 `onDraw`）反复分配短命对象 | 泄漏、超大分配、缓存无限涨 |
+| 堆走势 | 锯齿：涨一点 → GC 砍掉 → 再涨 | 整体**持续上升**，最后撑爆 |
+| 用户感受 | 掉帧、滑动卡 | 进程被杀 / 崩溃 |
+| `onDraw` 里乱 new | ✅ 很常见 | 单靠短命小对象一般 ❌ |
+
+口诀：**抖 = 造得快也收得快，GC 忙到抖；溢 = 造了没收干净或一次造太大。**
+
+### 什么时候会变成 OOM？
+
+`onDraw` 本身很少单独搞出 OOM，但若叠加这些就会：
+
+1. **泄漏**：静态集合 / 单例一直持有 View、Bitmap、大数组，GC 收不掉。  
+2. **超大分配**：每帧解码大图、复制巨大 `ByteArray` / `Bitmap`。  
+3. **缓存无上限**：`onDraw` 外层缓存只加不删。
+
+那时堆**真的涨着不回落**，才是溢出路线。
+
+### 正确写法：对象提到成员，反复复用
+
+```kotlin
+class DemoView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+
+    // ✅ 提到字段：只创建一次，onDraw 里复用
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeWidth = 4f
+    }
+    private val rect = RectF()
+    private val path = Path()
+
+    override fun onDraw(canvas: Canvas) {
+        // ❌ 不要：Paint() / RectF() / Path() 写在这里
+        rect.set(0f, 0f, width.toFloat(), height.toFloat())
+        path.reset()
+        path.addRoundRect(rect, 16f, 16f, Path.Direction.CW)
+        canvas.drawPath(path, paint)
+    }
+}
+```
+
+| 做法 | 结果 |
+|---|---|
+| `onDraw` 里每次 `Paint()` / `RectF()` | 高频分配 → GC 抖动 |
+| 字段持有，`onDraw` 只 `set` / `reset` / 改属性 | 分配次数≈0 → 更稳帧 |
+
+### 和本课的关系
+
+第 28 课讲 View / Fragment 体系；自定义 View 的 `onDraw` 属于同一条「别在热点路径乱分配」的工程纪律。Compose 里也少在每次重组里无意义地 `new` 大对象，道理类似。
