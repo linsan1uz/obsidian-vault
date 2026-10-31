@@ -365,3 +365,88 @@ val chained = DemoUser("bob", 18)   // 或工程里等价的小写起步再大�
 - **要变返回类型** → `let` / `run` / `with`
 - **还是原对象** → `apply` / `also`
 - 可空用 `?.let` / `?.run` / `?.also` / `?.apply`；别写 `?.with`
+
+---
+
+## 答疑补充：let / apply / also 到底怎么选（语音答疑）
+
+> Jerry 语音追问整理：`let` 到底干什么？`apply` 既然是初始化，为什么不直接 setter？`also` 和 `apply` 差在哪？
+
+### 1. `let`：不只是判空
+
+三件事常一起出现：
+
+1. **判空**：`?.let { }` —— null 就不进块。  
+2. **转换成新值**：块的**最后一行**当返回值（类型可以变）。  
+3. **限定作用域**：临时名字只活在块里，外面干净。
+
+```kotlin
+val raw: String? = "  bob  "
+val name = raw?.let { s ->
+    s.trim().replaceFirstChar { it.uppercase() }   // 返回新 String
+}
+// name: String? = "Bob"
+```
+
+口诀：**有值才干；干完往往得到另一个东西。**
+
+### 2. `apply`：为什么不「直接 setter」？
+
+在 Kotlin 里写 `user.name = "Bob"`，**本来就会调用属性的 setter**（和 Java 的 `setName` 是一类事）。  
+所以 `apply` **不是**为了「多一种赋值方式」，而是为了：
+
+| 价值 | 说明 |
+|---|---|
+| **集中配置** | 多次赋值放进一个块，读起来是「在初始化这个对象」 |
+| **少写变量名** | 块里是 `this`，不用反复 `paint.xxx` |
+| **返回自己** | 整个 `apply { }` 是表达式，能直接赋给 `val` 或继续链式 |
+
+```kotlin
+// Kotlin：一块搞定 + 当表达式用
+val paint = Paint().apply {
+    color = Color.RED
+    strokeWidth = 2f
+    isAntiAlias = true
+}
+
+// 对照 Java 常见写法：先 new，再一行行 set
+// Paint paint = new Paint();
+// paint.setColor(Color.RED);
+// paint.setStrokeWidth(2f);
+// paint.setAntiAlias(true);
+```
+
+没有 `apply` 也能赋值；有了它，**初始化这段话更短、更能当一行表达式**。
+
+### 3. `also`：顺便做一件事
+
+- 块里叫 **`it`**（强调「顺手拿这个对象做点别的」）。  
+- **返回自身**（和 `apply` 一样不换类型）。  
+- 典型：打日志、加进列表、断言——**副作用**，不是改配置的主战场。
+
+```kotlin
+val user = DemoUser("Tom", 20)
+    .also { Log.d("Demo", "创建了: $it") }
+    .also { cache.add(it) }
+```
+
+### 4. `also` vs `apply`（就记这一点）
+
+| | `apply` | `also` |
+|---|---|---|
+| 块里 | **`this`**（可直接写 `name = ...`） | **`it`**（写 `it.name`） |
+| 返回 | 自己 | 自己 |
+| 语感 | **配置 / 初始化我自己** | **顺便用我做件事** |
+
+```kotlin
+user.apply { age = 18 }                 // this.age
+user.also { println(it.age) }           // 旁观 it
+```
+
+两者都能链式；**改属性优先 apply，旁观/日志优先 also**。
+
+### 5. 超短选用
+
+- 可空 → 转换新值 → **`let`**
+- 一堆属性初始化、要当表达式 → **`apply`**
+- 不改类型、只顺便干一票 → **`also`**
