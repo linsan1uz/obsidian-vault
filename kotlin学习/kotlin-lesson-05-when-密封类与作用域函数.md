@@ -274,3 +274,94 @@ with -> 摘要: Jerry / 25 岁
 
 
 > 工程可跑：coroutineStudy 里打开主页按钮「作用域函数 demo（第5课）」→ ScopeFunctionsDemoActivity（Logcat：ScopeFunctionsDemo）；单测 ScopeFunctionsDemoTest 断言链式结果 Bob -> 19。
+
+---
+
+## 答疑补充：demo 里几个作用域函数逐个讲解
+
+> Jerry 提问：讲一下你写的几个作用域吧  
+> 对照工程：`coroutineStudy` → 主页「作用域函数 demo（第5课）」→ `runScopeFunctionsDemo()`（Logcat：`ScopeFunctionsDemo`）。
+
+### 1. `let`：可空检查 + 转换（`it`，返回最后一行）
+
+```kotlin
+val raw: String? = "  bob  "
+val name = raw
+    ?.let { it.trim() }
+    ?.let { it.replaceFirstChar { c -> c.uppercase() } }
+// → "Bob"；若 raw == null，整段跳过，name 为 null
+```
+
+- `?.let`：左边 null 就不进块。
+- 块里默认叫 **`it`**。
+- **返回值 = 块的最后一行**（新字符串）。
+
+### 2. `also`：顺手副作用（`it`，返回自己）
+
+```kotlin
+val user = DemoUser("Tom", 20)
+    .also { lines += "also 创建前看看: $it" }
+// 返回的还是原来的 user
+```
+
+适合打日志、检查——**不改返回类型**。
+
+### 3. `apply`：配置对象（`this`，返回自己）
+
+```kotlin
+user.apply {
+    name = nameFromLet   // 可省略 this.
+    age = 18
+}
+```
+
+块里是 **`this`**，适合一口气改多个属性；返回自己，便于继续链式。
+
+### 4. `run`：在对象上算结果（`this`，返回最后一行）
+
+```kotlin
+val label = user.run { "$name ($age)" }
+// → "Bob (18)"，类型变成 String
+```
+
+和 `apply` 一样用 `this`，但**返回最后一行**（会变类型）。
+
+### 5. `with`：不是扩展函数（`this`，返回最后一行）
+
+```kotlin
+val summary = with(user) { "摘要: $name / $age 岁" }
+```
+
+- 写法是 `with(obj) { }`，**不是** `obj.with { }`。
+- **没有** `nullable?.with`；可空请用 `?.run` / `?.let`。
+- 语义接近 `run`。
+
+### 6. 链式那段为什么是 `"Bob -> 19"`
+
+```kotlin
+val chained = DemoUser("bob", 18)   // 或工程里等价的小写起步再大写
+    .also { /* 看一眼，返回自己 */ }
+    .apply {
+        name = name.replaceFirstChar { it.uppercase() }  // bob → Bob
+        age += 1                                         // 18 → 19
+    }
+    .run { "$name -> $age" }   // "Bob -> 19"
+```
+
+顺序：**also 旁观 → apply 改字段 → run 拼出新字符串**。单测 `ScopeFunctionsDemoTest` 断言的就是这个 `chained`。
+
+### 7. 对照表
+
+| 函数 | 块里叫 | 返回值 | 典型用途 |
+|---|---|---|---|
+| `let` | `it` | 最后一行 | 可空、转换 |
+| `also` | `it` | **自己** | 日志等副作用 |
+| `apply` | `this` | **自己** | 初始化 / 改属性 |
+| `run` | `this` | 最后一行 | 算结果 |
+| `with(x)` | `this` | 最后一行 | 对已有对象写多句 |
+
+### 8. 口诀
+
+- **要变返回类型** → `let` / `run` / `with`
+- **还是原对象** → `apply` / `also`
+- 可空用 `?.let` / `?.run` / `?.also` / `?.apply`；别写 `?.with`
