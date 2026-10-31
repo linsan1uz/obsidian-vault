@@ -81,12 +81,12 @@ class ProfileActivity : AppCompatActivity() {
 
 ### `lateinit` vs `lazy`
 
-| | `lateinit var` | `by lazy`（第 2 课） |
-|---|---|---|
-| 可变性 | `var`，可多次赋值 | 本质是 `val`，只初始化一次 |
-| 谁赋值 | **你自己**在某处赋值 | **第一次访问时**自动执行 lambda |
-| 线程 | 无内置同步 | 默认线程安全（`LazyThreadSafetyMode.SYNCHRONIZED`） |
-| 适用 | 框架回调里注入、测试里后赋值 | 昂贵对象、真正的延迟创建 |
+|     | `lateinit var` | `by lazy`（第 18 课）                           |
+| --- | -------------- | ------------------------------------------- |
+| 可变性 | `var`，可多次赋值    | 本质是 `val`，只初始化一次                            |
+| 谁赋值 | **你自己**在某处赋值   | **第一次访问时**自动执行 lambda                       |
+| 线程  | 无内置同步          | 默认线程安全（`LazyThreadSafetyMode.SYNCHRONIZED`） |
+| 适用  | 框架回调里注入、测试里后赋值 | 昂贵对象、真正的延迟创建                                |
 
 Compose / 现代写法里，ViewBinding 场景变少；`lateinit` 仍常见于测试、部分 DI、遗留 View 代码。能用构造注入或 `lazy` 就优先它们。
 

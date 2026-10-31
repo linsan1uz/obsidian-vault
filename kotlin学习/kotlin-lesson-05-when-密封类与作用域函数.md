@@ -205,3 +205,69 @@ user?.let { println(it.name) }
 ---
 
 **下一课预告（第 6 课）：泛型与型变入门** —— `List<out T>` 的 out/in 是什么、为什么 `List<String>` 能当 `List<Any>` 用，看懂 Android 源码里的型变声明。
+
+---
+
+## 答疑补充：可运行的作用域函数 demo
+
+> Jerry 提问：能给我写一段可以运行的作用域函数吗？
+> 复制到 [Kotlin Playground](https://play.kotlinlang.org) 即可跑。
+
+```kotlin
+data class User(var name: String, var age: Int)
+
+fun main() {
+    val raw: String? = "  Jerry  "
+
+    // let：it = 接收者，返回【块的最后一行】；常用于可空 + 转换
+    val name = raw
+        ?.let { it.trim() }
+        ?.let { it.replaceFirstChar { c -> c.uppercase() } }
+    println("let -> $name")                    // Jerry
+
+    // also：it = 接收者，返回【接收者自己】；适合顺手打日志
+    val user = User("Tom", 20)
+        .also { println("also 创建前看看: $it") }
+
+    // apply：this = 接收者，返回【接收者自己】；适合初始化
+    user.apply {
+        name = "Jerry"
+        age = 25
+    }
+    println("apply -> $user")                  // User(name=Jerry, age=25)
+
+    // run：this = 接收者，返回【块的最后一行】；配置完再算个结果
+    val label = user.run {
+        "$name ($age)"
+    }
+    println("run -> $label")                   // Jerry (25)
+
+    // with：不是扩展函数，with(obj) { this = obj }，返回块结果
+    val summary = with(user) {
+        "摘要: $name / $age 岁"
+    }
+    println("with -> $summary")                // 摘要: Jerry / 25 岁
+}
+```
+
+### 怎么记
+
+| 函数 | 对象在块里 | 返回值 | 一句话 |
+|---|---|---|---|
+| `let` | `it` | 块结果 | 可空链式、转换 |
+| `also` | `it` | **自己** | 顺带副作用（日志） |
+| `apply` | `this` | **自己** | 初始化 / 改属性 |
+| `run` | `this` | 块结果 | 配置并算出一个值 |
+| `with(x)` | `this` | 块结果 | 对已有对象写多句 |
+
+口诀：**要对象继续往下传 → apply / also；要算出新值 → let / run / with。块里想省略名字用 this → apply/run/with；想明确叫 it → let/also。**
+
+### 预期输出
+
+```
+let -> Jerry
+also 创建前看看: User(name=Tom, age=20)
+apply -> User(name=Jerry, age=25)
+run -> Jerry (25)
+with -> 摘要: Jerry / 25 岁
+```
