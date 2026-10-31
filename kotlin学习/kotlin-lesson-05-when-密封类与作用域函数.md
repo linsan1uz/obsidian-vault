@@ -271,3 +271,6 @@ apply -> User(name=Jerry, age=25)
 run -> Jerry (25)
 with -> 摘要: Jerry / 25 岁
 ```
+
+
+> 工程可跑：coroutineStudy 里打开主页按钮「作用域函数 demo（第5课）」→ ScopeFunctionsDemoActivity（Logcat：ScopeFunctionsDemo）；单测 ScopeFunctionsDemoTest 断言链式结果 Bob -> 19。
