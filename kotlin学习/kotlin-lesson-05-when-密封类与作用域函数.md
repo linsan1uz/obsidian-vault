@@ -450,3 +450,31 @@ user.also { println(it.age) }           // 旁观 it
 - 可空 → 转换新值 → **`let`**
 - 一堆属性初始化、要当表达式 → **`apply`**
 - 不改类型、只顺便干一票 → **`also`**
+
+---
+
+## 答疑补充：run 的作用是什么（语音答疑）
+
+> Jerry 语音提问：Run 的作用是什么？
+
+**一句话：**`run` 在某个对象上**算出一个结果**——块里用 `this`（可省略），**返回值是花括号最后一行**。
+
+可以记成：**写法像 `apply`（`this`），返回值像 `let`（最后一行）。**
+
+```kotlin
+val user = DemoUser("Jerry", 25)
+val intro = user.run {
+    "$name，$age 岁"   // this.name / this.age，省略 this
+}
+// intro = "Jerry，25 岁"（类型变成 String）
+```
+
+可空时常用 `?.run`：
+
+```kotlin
+val text: String? = "  hi  "
+val len = text?.run { trim().length } ?: 0
+// text 非空 → 进块算 trim 后长度；null → 整段跳过，用 0
+```
+
+和邻居对比：要**改自己还当自己用** → `apply`；要**算出别的值** → `run`（或 `let`，块里用 `it`）。
