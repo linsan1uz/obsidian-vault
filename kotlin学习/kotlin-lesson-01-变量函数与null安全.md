@@ -137,3 +137,94 @@ fun toast(msg: String, duration: Int = 1000) {
     println("显示 $msg，时长 $duration")
 }
 ```
+
+---
+
+## 答疑补充：函数如何写返回值？
+
+> Jerry 提问：Kotlin 如何给一个函数写返回值？
+
+### 1. 显式返回类型（最常见）
+
+在参数列表后面写 `: 类型`，函数体里用 `return`：
+
+```kotlin
+fun add(a: Int, b: Int): Int {
+    return a + b
+}
+
+fun greet(name: String): String {
+    return "你好，$name"
+}
+```
+
+口诀：**`fun 名字(...): 返回类型 { return 值 }`**。
+
+### 2. 没有有意义返回值 → `Unit`（可省略）
+
+Kotlin 里没有 Java 的 `void`。不返回东西时类型是 `Unit`，通常**不用写**：
+
+```kotlin
+fun log(msg: String) {          // 等价于 : Unit
+    println(msg)
+}
+
+fun logExplicit(msg: String): Unit {
+    println(msg)
+}
+```
+
+| Java | Kotlin |
+|---|---|
+| `void foo()` | `fun foo() { ... }`（隐式 `Unit`） |
+| 无返回值 | `Unit` 是单例对象，不是“空” |
+
+### 3. 单表达式函数（`=` 形式）
+
+函数体只有一个表达式时，用 `=`，常可省略 `: 类型`（编译器推断）：
+
+```kotlin
+fun add(a: Int, b: Int): Int = a + b
+fun double(x: Int) = x * 2          // 推断为 Int
+fun title(name: String) = "Hi, $name"
+```
+
+注意：`=` 后面**不要再写 `return`**（那是语句块写法）。
+
+### 4. 可空返回类型 `String?`
+
+返回值也可能是 null 时，类型加 `?`：
+
+```kotlin
+fun findUser(id: Int): String? {
+    return if (id > 0) "user-$id" else null
+}
+
+val name = findUser(0)?.uppercase() ?: "匿名"
+```
+
+和本课 Null 安全一致：调用方必须用 `?.` / `?:` 等处理。
+
+### 5. 提前返回 & 从 lambda 返回
+
+```kotlin
+fun firstPositive(nums: List<Int>): Int? {
+    for (n in nums) {
+        if (n > 0) return n   // 提前结束整个函数
+    }
+    return null
+}
+
+// lambda 里：裸 return 会退出「外层函数」；用标签只退出 lambda
+fun demo(list: List<Int>) {
+    list.forEach {
+        if (it < 0) return@forEach   // 只跳过本次，继续 forEach
+        println(it)
+    }
+    // 若写成 return，会直接结束 demo 函数
+}
+```
+
+### 收束
+
+**写返回值 = `: Type` + `return`；无返回用 `Unit`（可省略）；一行函数用 `= expr`；可能为空写 `Type?`；lambda 里要提前退用 `return@label`。** 和 Java 最大差别：没有 `void`，只有 `Unit`。
